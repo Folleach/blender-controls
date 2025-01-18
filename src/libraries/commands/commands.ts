@@ -1,5 +1,7 @@
+import type { IContext } from "../contexts";
+
 export interface ICommand {
-	execute: () => void;
+	execute: (context: IContext) => void;
 }
 
 export interface ICommandRegistrar {
