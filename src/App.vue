@@ -4,6 +4,9 @@ import WorkspaceComponent from "./components/workspaces/WorkspaceComponent.vue";
 import { ConsoleCommand } from "./libraries/commands/consoleCommand";
 import { Menu, MenuDirectoryElement, MenuLeaf, MenuSeparatorElement } from "./libraries/menus";
 import { MenuService } from "./libraries/menus/service";
+import { LocalStorageWorkspaceRepository, WorkspaceService } from "./libraries/workspaces/service";
+import { AreaSize, ContainerArea, LeafArea, Orientation, Workspace } from '@/libraries/workspaces';
+import WorkspaceTabList from "./components/workspaces/WorkspaceTabList.vue";
 
 const broadcast = new BroadcastChannel("channel");
 broadcast.addEventListener("message", (a: MessageEvent<{ message: string }>) => {
@@ -32,22 +35,41 @@ const menu = new Menu([
 ]);
 
 const menuService = new MenuService();
-menuService.set({ x: 150, y: 50 }, menu, 0);
 
 function openContextMenu(e: PointerEvent) {
 	if (e.button != 2)
 		return;
-	menuService.set({ x: e.pageX, y: e.pageY }, menu, { message: "open from App" });
+	menuService.set(menu, { message: "open from App" });
 	return true;
 }
+
+const a1 = new LeafArea<string>("hello");
+const a2 = new LeafArea<string>("world");
+const a3 = new LeafArea<string>("right");
+const a4 = new LeafArea<string>("additional");
+const c1 = new ContainerArea(Orientation.Vertical, a1, a2, new AreaSize(1, "fr"), new AreaSize(2, "fr"));
+const c2 = new ContainerArea(Orientation.Horizontal, a3, a4, new AreaSize(1, "fr"), new AreaSize(2, "fr"));
+const root = new ContainerArea(Orientation.Horizontal, c1, c2, new AreaSize(1, "fr"), new AreaSize(2, "fr"));
+const workspace = new Workspace(root);
+
+const workspaceService = new WorkspaceService(new LocalStorageWorkspaceRepository());
+workspaceService.restore().then(successfully => {
+	if (!successfully)
+		workspaceService.add("main", workspace);
+});
+
 </script>
 
 <template>
-	<div style="height: 100%; position: relative" v-on:pointerdown="openContextMenu" oncontextmenu="return false">
-		<div style="position: absolute" class="c-full">
-			<WorkspaceComponent />
+	<div style="height: 100%;" v-on:pointerdown="openContextMenu" oncontextmenu="return false">
+		<div style="display: grid; grid-template-rows: auto 1fr; height: 100%;">
+			<WorkspaceTabList :service="workspaceService" :menu-service="menuService" />
+			<div style="height: 100%;">
+				<WorkspaceComponent :service="workspaceService" />
+			</div>
 		</div>
-		<div style="position: absolute" class="c-full">
+
+		<div style="position: absolute; pointer-events: none;" class="c-full">
 			<MenuSpace :service="menuService" />
 		</div>
 	</div>

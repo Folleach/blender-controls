@@ -14,14 +14,14 @@ import type { IOverlayProps } from "./WorkspaceAreaProps";
 
 const start = { x: 0, y: 0 };
 const last = { x: 0, y: 0 };
+let context: Rectangle | undefined = undefined;
 const workspaceRectangles: Map<IArea, Rectangle> = new Map();
 const areaSizes: Map<IArea, AreaSize[]> = new Map();
 let perform: (e: PointerEvent) => void;
 let end: (() => void) | undefined;
 
 export function resizeArea(e: PointerEvent, workspace: Workspace, area: IArea, side: Side) {
-	last.x = e.pageX;
-	last.y = e.pageY;
+	contexted(last, e);
 	const container = workspace.findSiblingContainer(area, side);
 	if (!container) {
 		console.error("failed to resize, this is not container", container);
@@ -74,8 +74,7 @@ export function continuesSplit(
 	right: boolean,
 	bottom: boolean,
 ): IOverlayProps | undefined {
-	last.x = current.pageX;
-	last.y = current.pageY;
+	contexted(last, current);
 	const firstArea = workspace.findArea(start, (x) => x instanceof LeafArea);
 	const area = workspace.findArea(last, (x) => x instanceof LeafArea);
 	if (!area) return undefined;
@@ -101,7 +100,7 @@ export function continuesSplit(
 }
 
 export function finishSplit(workspace: Workspace, right: boolean, bottom: boolean) {
-	const firstArea = workspace.findArea(start, (x) => x instanceof LeafArea);
+	const firstArea = workspace.findArea({ x: start.x + (context?.x ?? 0), y: start.y + (context?.y ?? 0) }, (x) => x instanceof LeafArea);
 	const area = workspace.findArea(last, (x) => x instanceof LeafArea);
 	if (!area) {
 		console.error("area not found");
@@ -137,9 +136,15 @@ export function finishSplit(workspace: Workspace, right: boolean, bottom: boolea
 	});
 }
 
-export function capture(e: PointerEvent, workspace: Workspace, f: (e: PointerEvent) => void, endPerform: (() => void) | undefined = undefined) {
-	start.x = e.pageX;
-	start.y = e.pageY;
+export function capture(
+	e: PointerEvent,
+	workspace: Workspace,
+	c: Rectangle | undefined,
+	f: (e: PointerEvent) => void,
+	endPerform: (() => void) | undefined = undefined,
+) {
+	context = c;
+	contexted(start, e);
 	normalizeSizes(workspace);
 	workspaceRectangles.clear();
 	for (const rect of workspace.rectangles) workspaceRectangles.set(rect[0], structuredClone(rect[1]));
@@ -176,5 +181,16 @@ function unlock() {
 	end = undefined;
 }
 
+function contexted(position: Position, e: PointerEvent) {
+	const x = e.pageX - (context?.x ?? 0);
+	const y = e.pageY - (context?.y ?? 0);
+	if (x < 0 || y < 0) {
+		return;
+	}
+	position.x = x;
+	position.y = y;
+}
+
 window.addEventListener("pointerup", () => unlock);
-// window.addEventListener('pointermove', e => console.log("pointer move here", { x: e.pageX, y: e.pageY }));
+// window.addEventListener("pointermove", (e) => console.log("pointer move here", { x: e.pageX, y: e.pageY }));
+// window.addEventListener("pointermove", (e) => console.log("currect context", context));

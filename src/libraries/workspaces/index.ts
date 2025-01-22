@@ -66,12 +66,12 @@ export class ContainerArea implements IArea {
 	rightSize: AreaSize;
 	update: IPipe<ContainerArea> = new LastPipe();
 
-	constructor(orientation: Orientation, left: IArea, right: IArea) {
+	constructor(orientation: Orientation, left: IArea, right: IArea, leftSize: AreaSize, rigthSize: AreaSize) {
 		this.orientation = orientation;
 		this.left = left;
 		this.right = right;
-		this.leftSize = new AreaSize(1, "fr");
-		this.rightSize = new AreaSize(2, "fr");
+		this.leftSize = leftSize;
+		this.rightSize = rigthSize;
 	}
 }
 
@@ -107,8 +107,16 @@ export class Workspace {
 		return new Workspace(
 			new ContainerArea(
 				Orientation.Horizontal,
-				new ContainerArea(Orientation.Vertical, new LeafArea<string>("hello"), new LeafArea<string>("world")),
+				new ContainerArea(
+					Orientation.Vertical,
+					new LeafArea<string>("hello"),
+					new LeafArea<string>("world"),
+					new AreaSize(1, "fr"),
+					new AreaSize(2, "fr"),
+				),
 				new LeafArea<string>("right"),
+				new AreaSize(1, "fr"),
+				new AreaSize(2, "fr"),
 			),
 		);
 	}
@@ -132,11 +140,15 @@ export class Workspace {
 		if (!(area instanceof LeafArea)) return;
 		const parent = <ContainerArea>this.parents.get(area);
 
-		const container = new ContainerArea(options.orientation, area === parent.left ? parent.left : parent.right, options.appendArea);
+		const container = new ContainerArea(
+			options.orientation,
+			area === parent.left ? parent.left : parent.right,
+			options.appendArea,
+			options.firstSize,
+			options.secondSize,
+		);
 		if (area === parent.left) parent.left = container;
 		else parent.right = container;
-		container.leftSize = options.firstSize;
-		container.rightSize = options.secondSize;
 
 		this.rebuildParents();
 		parent.update.push(parent);

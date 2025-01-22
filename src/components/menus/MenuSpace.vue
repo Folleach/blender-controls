@@ -52,7 +52,8 @@ function close() {
 </script>
 
 <template>
-	<div class="workspace" :key="key" :onclick="close">
+	<div class="workspace" :key="key" :onclick="close"
+		:style="{ pointerEvents: service.stack.length > 0 ? 'all' : 'none' }">
 		<div v-for="(item, index) in service.stack" :key="index" class="menu"
 			:style="{ position: 'absolute', left: `${item.position.x}px`, top: `${item.position.y}px` }">
 			<MenuContainer :menu="item.menu" :depth="index" />

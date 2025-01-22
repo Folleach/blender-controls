@@ -37,27 +37,33 @@ function finish() {
   overlay?.update(undefined);
   finishSplit(props.workspace, currentRight, currentBottom);
 }
+
 </script>
 
 <template>
-  <div class="corner" v-on:pointerdown="(e) => capture(e, workspace, (w) => performSplit(e, w, false, false), finish)">
+  <div class="corner"
+    v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), (w) => performSplit(e, w, false, false), finish)">
   </div>
   <div class="corner top-right"
-    v-on:pointerdown="(e) => capture(e, workspace, (w) => performSplit(e, w, true, false), finish)">
+    v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), (w) => performSplit(e, w, true, false), finish)">
   </div>
   <div class="corner bottom-left"
-    v-on:pointerdown="(e) => capture(e, workspace, (w) => performSplit(e, w, false, true), finish)">
+    v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), (w) => performSplit(e, w, false, true), finish)">
   </div>
   <div class="corner bottom-right"
-    v-on:pointerdown="(e) => capture(e, workspace, (w) => performSplit(e, w, true, true), finish)">
+    v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), (w) => performSplit(e, w, true, true), finish)">
   </div>
-  <div class="side top" v-on:pointerdown="(e) => capture(e, workspace, w => performResize(w, Side.Top))">
+  <div class="side top"
+    v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), w => performResize(w, Side.Top))">
   </div>
-  <div class="side right" v-on:pointerdown="(e) => capture(e, workspace, w => performResize(w, Side.Right))">
+  <div class="side right"
+    v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), w => performResize(w, Side.Right))">
   </div>
-  <div class="side bottom" v-on:pointerdown="(e) => capture(e, workspace, w => performResize(w, Side.Bottom))">
+  <div class="side bottom"
+    v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), w => performResize(w, Side.Bottom))">
   </div>
-  <div class="side left" v-on:pointerdown="(e) => capture(e, workspace, w => performResize(w, Side.Left))">
+  <div class="side left"
+    v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), w => performResize(w, Side.Left))">
   </div>
   <div style="overflow: scroll; overflow-y: scroll; height: 100%; justify-content: center; align-content: center; ">
     <h1 style="text-align: center;">{{ leaf.context }}</h1>

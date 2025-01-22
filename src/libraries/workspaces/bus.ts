@@ -18,3 +18,18 @@ export class LastPipe<T> implements IPipe<T> {
 		this.last = value;
 	}
 }
+
+export class BroadcastPipe<T> implements IPipe<T> {
+	private subscribers: ((value: T) => void)[] = [];
+	private last: T | undefined = undefined;
+
+	consume(action: (value: T) => void) {
+		this.subscribers.push(action);
+		if (this.last) action(this.last);
+	}
+
+	push(value: T): void {
+		for (const subscriber of this.subscribers) subscriber(value);
+		this.last = value;
+	}
+}

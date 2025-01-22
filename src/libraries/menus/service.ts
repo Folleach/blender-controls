@@ -1,5 +1,6 @@
 import type { IMenu } from ".";
 import type { None } from "../common/none";
+import { getPointerPosition } from "../common/pointer";
 import type { IContext } from "../contexts";
 import type { Position, Rectangle } from "../workspaces";
 import { LastPipe, type IPipe } from "../workspaces/bus";
@@ -10,7 +11,7 @@ interface IMenuHolder {
 }
 
 export interface IMenuService {
-	set: (position: Position, menu: IMenu, context: IContext) => void;
+	set: (menu: IMenu, context: IContext, position?: Position | undefined) => void;
 }
 
 export class MenuService implements IMenuService {
@@ -19,9 +20,9 @@ export class MenuService implements IMenuService {
 	rectangles: Map<number, Rectangle> = new Map();
 	context: IContext = {};
 
-	set(position: Position, menu: IMenu, context: IContext) {
+	set(menu: IMenu, context: IContext, position?: Position | undefined) {
 		this.context = context;
-		this.push(position, menu, 0);
+		this.push(position ?? getPointerPosition(), menu, 0);
 	}
 
 	push(position: Position, menu: IMenu, index: number) {

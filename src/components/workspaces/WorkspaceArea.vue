@@ -44,19 +44,22 @@ container?.update.consume(updateContainer);
 
 const containerElement = useTemplateRef<HTMLDivElement>('containerElement');
 onMounted(() => {
-  const box = containerElement.value?.getBoundingClientRect();
-  if (!box)
-    return;
-  const rectangle: Rectangle = {
-    x: box.left + window.scrollX,
-    y: box.top + window.scrollY,
-    width: box.width,
-    height: box.height,
-  }
-  if (leaf)
-    props.workspace.setActualRectangle(leaf, rectangle);
-  if (container)
-    props.workspace.setActualRectangle(container, rectangle);
+  // note: onMounted is called before the browser calculates the fraction units.
+  setTimeout(() => {
+    const box = containerElement.value?.getBoundingClientRect();
+    if (!box)
+      return;
+    const rectangle: Rectangle = {
+      x: box.left,
+      y: box.top,
+      width: box.width,
+      height: box.height,
+    }
+    if (leaf)
+      props.workspace.setActualRectangle(leaf, rectangle);
+    if (container)
+      props.workspace.setActualRectangle(container, rectangle);
+  }, 1);
 })
 
 </script>

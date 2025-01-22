@@ -46,5 +46,7 @@ function show() {
 <style lang="css">
 .p-blender-icon {
     fill: color-mix(in srgb, black 40%, white 40%);
+    margin: 0.2rem 0.4rem;
+    align-items: center;
 }
 </style>

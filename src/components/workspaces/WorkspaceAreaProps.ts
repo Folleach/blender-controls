@@ -1,4 +1,6 @@
+import type { IMenuService } from "@/libraries/menus/service";
 import type { IArea, Orientation, Rectangle, Workspace, WorkspaceOperation } from "@/libraries/workspaces";
+import type { WorkspaceService } from "@/libraries/workspaces/service";
 
 export interface IWorkspaceAreaProps {
 	area: IArea;
@@ -21,4 +23,9 @@ export interface IOverlayProps {
 	orientation: Orientation;
 	size: number;
 	operation: WorkspaceOperation;
+}
+
+export interface IWorkspaceTabListProps {
+	service: WorkspaceService;
+	menuService: IMenuService;
 }

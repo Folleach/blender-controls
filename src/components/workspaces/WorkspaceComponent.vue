@@ -1,34 +1,49 @@
 <script setup lang="ts">
 import WorkspaceArea from './WorkspaceArea.vue';
-import { provide, ref } from 'vue';
+import { isProxy, provide, ref, toRaw, useTemplateRef } from 'vue';
 import WorkspaceOverlay from './WorkspaceOverlay.vue';
 import type { IOverlayProps } from './WorkspaceAreaProps';
 import { WORKSPACE_OVERLAY_KEY, type IWorkspaceOverlayContext } from './OverlayInjection';
-import { ContainerArea, LeafArea, Orientation, Workspace } from '@/libraries/workspaces';
+import { WorkspaceService } from '@/libraries/workspaces/service';
+import { domToRect } from '@/libraries/common/geometry';
+import type { Rectangle } from '@/libraries/workspaces';
 
-const a1 = new LeafArea<string>("hello");
-const a2 = new LeafArea<string>("world");
-const a3 = new LeafArea<string>("right");
-const a4 = new LeafArea<string>("additional");
-const c1 = new ContainerArea(Orientation.Vertical, a1, a2);
-const c2 = new ContainerArea(Orientation.Horizontal, a3, a4);
-const root = new ContainerArea(Orientation.Horizontal, c1, c2);
-const workspace = new Workspace(root);
+const props = defineProps<{ service: WorkspaceService }>();
+const service = isProxy(props.service) ? toRaw(props.service) : props.service;
+let active = service.active();
+const workspaceElement = useTemplateRef("workspace");
 
-const state = ref<IOverlayProps | undefined>(undefined)
-provide<IWorkspaceOverlayContext>(WORKSPACE_OVERLAY_KEY, {
+function getRectContext(): Rectangle | undefined {
+  return domToRect(workspaceElement?.value?.getBoundingClientRect());
+}
+
+const state = ref<IOverlayProps | undefined>(undefined);
+const context: IWorkspaceOverlayContext = {
   props: state.value,
-  update: v => state.value = v
-})
+  update: v => state.value = v,
+  getRectContext
+};
+provide<IWorkspaceOverlayContext>(WORKSPACE_OVERLAY_KEY, context)
+
+const key = ref(0);
+service.update.consume(() => {
+  active = service.active();
+  key.value++
+});
 </script>
 
 <template>
-  <div class="workspace">
+  <div v-if="active" class="workspace" :key="key" ref="workspace">
     <div class="inside">
-      <WorkspaceArea :overlay="state" :workspace="workspace" :area="workspace.root">hehe</WorkspaceArea>
+      <WorkspaceArea :overlay="state" :workspace="active" :area="active.root">hehe</WorkspaceArea>
     </div>
     <div class="inside overlay">
-      <WorkspaceOverlay :state="state" />
+      <WorkspaceOverlay :state="state" :get-rect-context="getRectContext" />
+    </div>
+  </div>
+  <div v-if="!active" class="workspace" :key="key">
+    <div class="warn">
+      <h1>There is an empty workspace here</h1>
     </div>
   </div>
 </template>
@@ -49,5 +64,12 @@ provide<IWorkspaceOverlayContext>(WORKSPACE_OVERLAY_KEY, {
 
 .overlay {
   pointer-events: none;
+}
+
+.warn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 </style>

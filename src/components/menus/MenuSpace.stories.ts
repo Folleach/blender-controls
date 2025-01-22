@@ -5,7 +5,6 @@ import { MenuService } from "@/libraries/menus/service";
 import { Menu, MenuDirectoryElement, MenuLeaf, MenuSeparatorElement } from "@/libraries/menus";
 import { AdHocCommand } from "@/libraries/commands/adhocCommand";
 import { fn } from "@storybook/test";
-import type { Position } from "@/libraries/workspaces";
 
 const meta = {
 	component: MenuSpace,
@@ -49,15 +48,11 @@ export const Primary: Story = {
 	},
 };
 
-let position: Position = { x: 0, y: 0 };
-window.addEventListener("pointermove", (e) => {
-	position = { x: e.pageX - 20, y: e.pageY - 18 };
-});
 window.addEventListener("keydown", (e) => {
 	if (e.key === "w") {
-		service.set(position, menuW, { message: "This is context from W key" });
+		service.set(menuW, { message: "This is context from W key" });
 	}
 	if (e.key === "e") {
-		service.set(position, menuE, { message: "This is another context" });
+		service.set(menuE, { message: "This is another context" });
 	}
 });

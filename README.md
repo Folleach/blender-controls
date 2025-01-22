@@ -14,10 +14,16 @@ npm run storybook
     - [x] move areas
     - [x] split areas
     - [ ] join areas
-    - [ ] store workspace layouts
+    - [x] store workspace layouts
     - [ ] separator context menu
         - [ ] swap area
         - [ ] join left/right
+    - [ ] workspace tabs
+        - [x] basic
+        - [ ] templates
+        - [ ] duplicate
+        - [ ] reorder
+        - [ ] remove
 - [ ] menus
     - [x] render
         - [x] item
@@ -32,6 +38,9 @@ npm run storybook
 - [ ] keyboard shortcuts
 - [ ] node editor
 - [ ] routine buttons, etc...
+    - [x] tab list
+        - [ ] rename on selected click
+    - [ ] button
 - [ ] custom themes
 
 This project is **under development**.  
