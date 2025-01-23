@@ -3,6 +3,10 @@ Therefore, I created this repository, in which implemented some [Blender interfa
 
 #### Try it
 
+https://folleach.net/blender-controls/storybook/index.html
+
+or build yourself
+
 ```bash
 npm run storybook
 ```
