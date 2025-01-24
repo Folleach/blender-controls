@@ -31,7 +31,7 @@ function stopPropagation(e: MouseEvent) {
 </script>
 
 <template>
-	<div class="container" ref="element" v-on:click="stopPropagation">
+	<div class="container" ref="element" v-on:pointerdown="stopPropagation">
 		<div class="container-inside">
 			<div v-for="(item, index) in menu.elements()" :key="index"
 				:class="(!(item instanceof MenuSeparatorElement)) ? 'selectable' : ''">

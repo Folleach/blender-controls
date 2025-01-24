@@ -61,8 +61,8 @@ workspaceService.restore().then(successfully => {
 </script>
 
 <template>
-	<div style="height: 100%;" v-on:pointerdown="openContextMenu" oncontextmenu="return false">
-		<div style="display: grid; grid-template-rows: auto 1fr; height: 100%;">
+	<div style="height: 100%;" oncontextmenu="return false">
+		<div style="display: grid; grid-template-rows: auto 1fr; height: 100%;" v-on:pointerdown="openContextMenu">
 			<WorkspaceTabList :service="workspaceService" :menu-service="menuService" />
 			<div style="height: 100%;">
 				<WorkspaceComponent :service="workspaceService" />

@@ -27,7 +27,7 @@ npm run storybook
         - [ ] templates
         - [ ] duplicate
         - [ ] reorder
-        - [ ] remove
+        - [x] remove
 - [ ] menus
     - [x] render
         - [x] item

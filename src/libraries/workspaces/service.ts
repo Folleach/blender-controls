@@ -18,18 +18,19 @@ interface IWorkspaceNode {
 	context: object | null;
 }
 
-export interface IWorkpsaceIndex {
+export interface IWorkspaceIndex {
 	id: string;
 	name: string;
 }
 
-interface IWorkspaceEntry extends IWorkpsaceIndex {
+interface IWorkspaceEntry extends IWorkspaceIndex {
 	root: IWorkspaceNode;
 }
 
 export interface IWorkspaceRepository {
 	set: (entry: IWorkspaceEntry) => Promise<boolean>;
-	getIndex: () => Promise<IWorkpsaceIndex[]>;
+	remove: (id: string) => Promise<boolean>;
+	getIndex: () => Promise<IWorkspaceIndex[]>;
 	get: (id: string) => Promise<IWorkspaceEntry | null>;
 }
 
@@ -37,7 +38,7 @@ export class LocalStorageWorkspaceRepository implements IWorkspaceRepository {
 	private prefix = "blen-workspaces";
 
 	async set(entry: IWorkspaceEntry): Promise<boolean> {
-		const index = this.getdb<IWorkpsaceIndex[]>(this.key("index")) ?? [];
+		const index = this.getdb<IWorkspaceIndex[]>(this.key("index")) ?? [];
 
 		const exists = index.findIndex((x) => x.id === entry.id);
 		const indexElement = {
@@ -53,12 +54,26 @@ export class LocalStorageWorkspaceRepository implements IWorkspaceRepository {
 		return true;
 	}
 
-	async getIndex(): Promise<IWorkpsaceIndex[]> {
-		return this.getdb<IWorkpsaceIndex[]>(this.key("index")) ?? [];
+	async getIndex(): Promise<IWorkspaceIndex[]> {
+		return this.getdb<IWorkspaceIndex[]>(this.key("index")) ?? [];
 	}
 
 	async get(id: string): Promise<IWorkspaceEntry | null> {
 		return this.getdb<IWorkspaceEntry>(this.key(id));
+	}
+
+	async remove(id: string): Promise<boolean> {
+		const index = this.getdb<IWorkspaceIndex[]>(this.key("index")) ?? [];
+
+		const element = index.find((x) => x.id === id);
+		if (!element) return false;
+		this.removedb(this.key(element.id));
+
+		this.setdb(
+			this.key("index"),
+			index.filter((x) => x.id !== id),
+		);
+		return true;
 	}
 
 	private key(value: string) {
@@ -81,11 +96,15 @@ export class LocalStorageWorkspaceRepository implements IWorkspaceRepository {
 	private setdb<T>(key: string, value: T): void {
 		localStorage.setItem(key, JSON.stringify(value));
 	}
+
+	private removedb(key: string): void {
+		localStorage.removeItem(key);
+	}
 }
 
 export class WorkspaceService {
 	private workspaces: Map<string, Workspace> = new Map();
-	private index: IWorkpsaceIndex[] = [];
+	private index: IWorkspaceIndex[] = [];
 	private repository: IWorkspaceRepository;
 	_active: string | undefined;
 	update: IPipe<None> = new BroadcastPipe();
@@ -133,11 +152,18 @@ export class WorkspaceService {
 		this.update.push({});
 	}
 
-	getIndex(): IWorkpsaceIndex[] {
+	getIndex(): IWorkspaceIndex[] {
 		return this.index;
 	}
 
-	private async load(index: IWorkpsaceIndex): Promise<boolean> {
+	async remove(id: string) {
+		await this.repository.remove(id);
+		this.workspaces.delete(id);
+		this.index = this.index.filter((x) => x.id !== id);
+		this.update.push({});
+	}
+
+	private async load(index: IWorkspaceIndex): Promise<boolean> {
 		const entry = await this.repository.get(index.id);
 		if (!entry) return false;
 		const area = this.convertNode(entry.root);
@@ -148,7 +174,7 @@ export class WorkspaceService {
 		return true;
 	}
 
-	private addInternal(index: IWorkpsaceIndex, workspace: Workspace) {
+	private addInternal(index: IWorkspaceIndex, workspace: Workspace) {
 		if (!this.index.find((x) => x.id === index.id)) this.index.push(index);
 		this.workspaces.set(index.id, workspace);
 	}

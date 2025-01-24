@@ -6,6 +6,7 @@ import { AdHocCommand } from '@/libraries/commands/adhocCommand';
 import { Workspace } from '@/libraries/workspaces';
 import { ref } from 'vue';
 import TabList from '../tabs/TabList.vue';
+import type { IWorkspaceIndex } from '@/libraries/workspaces/service';
 
 const props = defineProps<IWorkspaceTabListProps>();
 
@@ -17,19 +18,29 @@ const appendMenu = new Menu([
     }))
 ])
 
+const contextMenu = new Menu([
+    new MenuLeaf("Duplicate (not impl yet)", new AdHocCommand(() => {
+    })),
+    new MenuLeaf("Delete", new AdHocCommand(context => {
+        const index = <IWorkspaceIndex>context;
+        props.service.remove(index.id);
+    }))
+])
+
 props.service.update.consume(() => {
     const current = props.service._active;
     const t: ITab[] = [...props.service.getIndex().map(x => {
         const tab: ITab = {
             text: x.name,
             active: x.id === current,
-            execute: () => props.service.change(x.id)
+            execute: () => props.service.change(x.id),
+            contextMenu: () => props.menuService.set(contextMenu, x)
         }
         return tab;
     })];
     tabs.value = {
         tabs: t,
-        append: () => props.menuService.set(appendMenu, {})
+        append: () => props.menuService.set(appendMenu, {}),
     }
 });
 
