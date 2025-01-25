@@ -4,6 +4,7 @@ import { finishSplit, capture as capture, continuesSplit, resizeArea } from './W
 import { inject } from 'vue';
 import { WORKSPACE_OVERLAY_KEY, type IWorkspaceOverlayContext } from './OverlayInjection';
 import { LeafArea, Side } from '@/libraries/workspaces';
+import GlobalSpaceComponent from '../nodes/GlobalSpaceComponent.vue';
 
 const props = defineProps<ILeafAreaProps>();
 const leaf = props.area instanceof LeafArea ? props.area : undefined;
@@ -41,6 +42,11 @@ function finish() {
 </script>
 
 <template>
+  <div style="overflow: auto; overflow-y: auto; height: 100%; justify-content: center; align-content: center; ">
+    <GlobalSpaceComponent>
+      <h1> {{ leaf.context }}</h1>
+    </GlobalSpaceComponent>
+  </div>
   <div class="corner"
     v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), (w) => performSplit(e, w, false, false), finish)">
   </div>
@@ -64,9 +70,6 @@ function finish() {
   </div>
   <div class="side left"
     v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), w => performResize(w, Side.Left))">
-  </div>
-  <div style="overflow: scroll; overflow-y: scroll; height: 100%; justify-content: center; align-content: center; ">
-    <h1 style="text-align: center;">{{ leaf.context }}</h1>
   </div>
 </template>
 

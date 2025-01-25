@@ -57,6 +57,11 @@ export class AreaSize {
 	}
 }
 
+export enum ContainerUpdateType {
+	Resize,
+	Split,
+}
+
 export class ContainerArea implements IArea {
 	type: string = "container";
 	orientation: Orientation;
@@ -64,7 +69,7 @@ export class ContainerArea implements IArea {
 	right: IArea;
 	leftSize: AreaSize;
 	rightSize: AreaSize;
-	update: IPipe<ContainerArea> = new LastPipe();
+	update: IPipe<ContainerUpdateType> = new LastPipe();
 
 	constructor(orientation: Orientation, left: IArea, right: IArea, leftSize: AreaSize, rigthSize: AreaSize) {
 		this.orientation = orientation;
@@ -151,7 +156,7 @@ export class Workspace {
 		else parent.right = container;
 
 		this.rebuildParents();
-		parent.update.push(parent);
+		parent.update.push(ContainerUpdateType.Split);
 	}
 
 	setActualRectangle(area: IArea, rect: Rectangle) {

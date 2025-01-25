@@ -1,6 +1,7 @@
 import {
 	AreaSize,
 	ContainerArea,
+	ContainerUpdateType,
 	LeafArea,
 	Orientation,
 	WorkspaceOperation,
@@ -49,7 +50,7 @@ export function resizeArea(e: PointerEvent, workspace: Workspace, area: IArea, s
 	resizeParts(container.left, delta, container.orientation, false);
 	resizeParts(container.right, { x: -delta.x, y: -delta.y }, container.orientation, true);
 
-	container.update.push(container);
+	container.update.push(ContainerUpdateType.Resize);
 }
 
 function resizeParts(area: IArea, delta: Position, orientation: Orientation, left: boolean) {
@@ -62,7 +63,7 @@ function resizeParts(area: IArea, delta: Position, orientation: Orientation, lef
 		const item = left ? area.leftSize : area.rightSize;
 		const orig = areaSizes.get(area)![left ? 0 : 1];
 		item.size = orig.size + (orientation === Orientation.Horizontal ? delta.x : delta.y);
-		area.update.push(area);
+		area.update.push(ContainerUpdateType.Resize);
 		resizeParts(left ? area.left : area.right, delta, orientation, left);
 	}
 }
@@ -171,7 +172,7 @@ function normalizeSizes(workspace: Workspace) {
 		if (!left || !right) continue;
 		container.leftSize = new AreaSize(container.orientation === Orientation.Horizontal ? left.width : left.height, "fr");
 		container.rightSize = new AreaSize(container.orientation === Orientation.Horizontal ? right.width : right.height, "fr");
-		container.update.push(container);
+		container.update.push(ContainerUpdateType.Resize);
 	}
 }
 

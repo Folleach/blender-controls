@@ -1,18 +1,23 @@
 <script setup lang="ts">
 import type { IWorkspaceAreaProps } from './WorkspaceAreaProps';
-import { onMounted, ref, useTemplateRef } from 'vue';
+import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import LeafAreaComponent from './LeafAreaComponent.vue';
-import { ContainerArea, LeafArea, Orientation, type Rectangle } from '@/libraries/workspaces';
+import { ContainerArea, ContainerUpdateType, LeafArea, Orientation, type Rectangle } from '@/libraries/workspaces';
 
 const props = defineProps<IWorkspaceAreaProps>();
-const update = ref(0);
 
-let container = props.area instanceof ContainerArea ? props.area as ContainerArea : undefined;
+const container = props.area instanceof ContainerArea ? props.area as ContainerArea : undefined;
+const forceUpdate = ref(0);
+const sizes = ref({
+  left: container?.leftSize,
+  right: container?.rightSize
+});
 
 const leaf = props.area instanceof LeafArea ? props.area : null;
-
-const size = container && `${container.leftSize?.toString()} 2px ${container.rightSize?.toString()}`;
-const style = container?.orientation === Orientation.Horizontal ? { gridTemplateColumns: size! } : { gridTemplateRows: size! };
+const style = computed(() => {
+  const size = container && `${sizes.value.left?.toString()} 2px ${sizes.value.right?.toString()}`;
+  return container?.orientation === Orientation.Horizontal ? { gridTemplateColumns: size! } : { gridTemplateRows: size! };
+});
 
 // const ss = props.level ?? 0;
 // const debugStyle = {
@@ -22,51 +27,43 @@ const style = container?.orientation === Orientation.Horizontal ? { gridTemplate
 //   bottom: `${ss * 10}px`,
 // }
 
-function updateSize() {
-  const size = container && `${container.leftSize?.toString()} 2px ${container.rightSize?.toString()}`;
-  if (container?.orientation === Orientation.Horizontal)
-    style.gridTemplateColumns = size!
-  else if (container?.orientation === Orientation.Vertical)
-    style.gridTemplateRows = size!;
+const containerElement = useTemplateRef<HTMLDivElement>('containerElement');
+
+function updateRect() {
+  const box = containerElement.value?.getBoundingClientRect();
+  if (!box)
+    return;
+  const rectangle: Rectangle = {
+    x: box.left,
+    y: box.top,
+    width: box.width,
+    height: box.height,
+  };
+  props.workspace.setActualRectangle(leaf ?? container!, rectangle);
 }
 
-function updateContainer(newcontainer: ContainerArea) {
-  if (!newcontainer) {
-    console.error("trying to update container on the leaf");
-    return;
+onMounted(() => {
+  if (containerElement.value)
+    new ResizeObserver(updateRect).observe(containerElement.value);
+})
+
+function updateContainer(newcontainer: ContainerUpdateType) {
+  sizes.value = {
+    left: container?.leftSize,
+    right: container?.rightSize
   }
-  container = newcontainer;
-  updateSize();
-  update.value++;
+  if (newcontainer === ContainerUpdateType.Split) {
+    forceUpdate.value++;
+  }
 }
 
 container?.update.consume(updateContainer);
-
-const containerElement = useTemplateRef<HTMLDivElement>('containerElement');
-onMounted(() => {
-  // note: onMounted is called before the browser calculates the fraction units.
-  setTimeout(() => {
-    const box = containerElement.value?.getBoundingClientRect();
-    if (!box)
-      return;
-    const rectangle: Rectangle = {
-      x: box.left,
-      y: box.top,
-      width: box.width,
-      height: box.height,
-    }
-    if (leaf)
-      props.workspace.setActualRectangle(leaf, rectangle);
-    if (container)
-      props.workspace.setActualRectangle(container, rectangle);
-  }, 1);
-})
 
 </script>
 
 <template>
   <div v-if="container" style="height: 100%; background-color: black; position: relative;" ref="containerElement">
-    <div class="template inside" :style="style" :key="update">
+    <div class="template inside" :style="style" :key="forceUpdate">
       <div class="container">
         <WorkspaceArea :level="level ? level + 1 : 1" :workspace="workspace" :area="container.left"></WorkspaceArea>
       </div>
@@ -82,7 +79,7 @@ onMounted(() => {
     </div> -->
   </div>
   <div v-else class="template" ref="containerElement">
-    <LeafAreaComponent :workspace="workspace" :area="area" />
+    <LeafAreaComponent :workspace="workspace" :area="area" :key="leaf?.context" />
   </div>
 </template>
 

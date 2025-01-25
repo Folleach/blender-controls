@@ -41,6 +41,11 @@ npm run storybook
     - [ ] custom icons
 - [ ] keyboard shortcuts
 - [ ] node editor
+    - [x] global space
+    - [ ] nodes
+    - [ ] sockets
+    - [ ] groups
+    - [ ] areas
 - [ ] routine buttons, etc...
     - [x] tab list
         - [ ] rename on selected click
