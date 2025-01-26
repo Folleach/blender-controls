@@ -18,7 +18,7 @@ function onContext(e: PointerEvent, tab: ITab) {
     <div class="container">
         <div v-for="(item, index) in tabs" class="tab" :key="index" v-on:click="item.execute"
             v-on:pointerdown="e => onContext(e, item)"
-            :style="{ backgroundColor: item.active ? '#333' : '', color: item.active ? 'white' : '' }">
+            :style="{ backgroundColor: item.active ? 'var(--cl-tx2)' : '', color: item.active ? 'white' : '' }">
             <p>{{ item.text }}</p>
         </div>
         <div v-if="append" class="tab" :onclick="append">
@@ -36,11 +36,11 @@ function onContext(e: PointerEvent, tab: ITab) {
 }
 
 .tab {
-    background-color: #222;
+    background-color: var(--cl-bg2);
 }
 
 .tab:hover {
-    background-color: #272727;
+    background-color: var(--cl-ui);
 }
 
 p {

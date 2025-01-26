@@ -23,7 +23,7 @@ const context: IWorkspaceOverlayContext = {
   update: v => state.value = v,
   getRectContext
 };
-provide<IWorkspaceOverlayContext>(WORKSPACE_OVERLAY_KEY, context)
+provide<IWorkspaceOverlayContext>(WORKSPACE_OVERLAY_KEY, context);
 
 const key = ref(0);
 service.update.consume(() => {

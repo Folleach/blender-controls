@@ -4,7 +4,9 @@ import { finishSplit, capture as capture, continuesSplit, resizeArea } from './W
 import { inject } from 'vue';
 import { WORKSPACE_OVERLAY_KEY, type IWorkspaceOverlayContext } from './OverlayInjection';
 import { LeafArea, Side } from '@/libraries/workspaces';
-import GlobalSpaceComponent from '../nodes/GlobalSpaceComponent.vue';
+import { WorkspaceApi } from '@/libraries/workspaces/api';
+import type { InitAreaService } from '../window';
+import { INIT_WINDOW_SERVICE_KEY } from '@/libraries/window';
 
 const props = defineProps<ILeafAreaProps>();
 const leaf = props.area instanceof LeafArea ? props.area : undefined;
@@ -13,6 +15,7 @@ if (!leaf)
   throw { message: "area isn't leaf" }
 
 const overlay = inject<IWorkspaceOverlayContext>(WORKSPACE_OVERLAY_KEY);
+const windowService = inject<InitAreaService>(INIT_WINDOW_SERVICE_KEY);
 let currentRight = false;
 let currentBottom = false;
 
@@ -39,13 +42,14 @@ function finish() {
   finishSplit(props.workspace, currentRight, currentBottom);
 }
 
+const api = new WorkspaceApi(props.workspace, leaf);
+const component = windowService?.create(leaf.windowId);
+
 </script>
 
 <template>
-  <div style="overflow: auto; overflow-y: auto; height: 100%; justify-content: center; align-content: center; ">
-    <GlobalSpaceComponent>
-      <h1> {{ leaf.context }}</h1>
-    </GlobalSpaceComponent>
+  <div style="overflow: auto; overflow-y: auto; height: 100%;">
+    <component :is="component" :api="api" />
   </div>
   <div class="corner"
     v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), (w) => performSplit(e, w, false, false), finish)">

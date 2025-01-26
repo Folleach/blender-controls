@@ -47,12 +47,12 @@ onMounted(() => {
     new ResizeObserver(updateRect).observe(containerElement.value);
 })
 
-function updateContainer(newcontainer: ContainerUpdateType) {
+function updateContainer(operation: ContainerUpdateType) {
   sizes.value = {
     left: container?.leftSize,
     right: container?.rightSize
   }
-  if (newcontainer === ContainerUpdateType.Split) {
+  if (operation === ContainerUpdateType.Split || operation === ContainerUpdateType.Swap) {
     forceUpdate.value++;
   }
 }
@@ -62,8 +62,8 @@ container?.update.consume(updateContainer);
 </script>
 
 <template>
-  <div v-if="container" style="height: 100%; background-color: black; position: relative;" ref="containerElement">
-    <div class="template inside" :style="style" :key="forceUpdate">
+  <div v-if="container" class="root">
+    <div class="template inside" :style="style" ref="containerElement" :key="forceUpdate">
       <div class="container">
         <WorkspaceArea :level="level ? level + 1 : 1" :workspace="workspace" :area="container.left"></WorkspaceArea>
       </div>
@@ -84,6 +84,12 @@ container?.update.consume(updateContainer);
 </template>
 
 <style scoped>
+.root {
+  height: 100%;
+  background-color: var(--cl-bg);
+  position: relative;
+}
+
 .template {
   display: grid;
   width: 100%;
@@ -92,8 +98,9 @@ container?.update.consume(updateContainer);
 
 .container {
   border-radius: 0.5em;
-  background-color: var(--color-background);
+  background-color: var(--cl-ui);
   position: relative;
+  overflow: auto;
 }
 
 .inside {

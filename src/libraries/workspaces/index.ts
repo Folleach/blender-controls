@@ -1,5 +1,8 @@
+import type { IContext } from "../contexts";
 import { LastPipe, type IPipe } from "./bus";
 import { intersect2d } from "./geometry";
+
+export const INIT_AREA_ID = "blen.init-window";
 
 export enum Orientation {
 	Horizontal = 0,
@@ -41,6 +44,10 @@ export interface IArea {
 	type: string;
 }
 
+export interface IWorkspaceContext extends IContext {
+	windowId: string;
+}
+
 export class RectangleArray {}
 
 export class AreaSize {
@@ -60,6 +67,7 @@ export class AreaSize {
 export enum ContainerUpdateType {
 	Resize,
 	Split,
+	Swap,
 }
 
 export class ContainerArea implements IArea {
@@ -82,10 +90,19 @@ export class ContainerArea implements IArea {
 
 export class LeafArea<T> implements IArea {
 	type: string = "leaf";
+	private _windowId: string;
 	private _context: T;
 
-	constructor(context: T) {
+	constructor(windowId: string, context: T) {
+		this._windowId = windowId;
 		this._context = context;
+	}
+
+	public get windowId(): string {
+		return this._windowId;
+	}
+	public set windowId(v: string) {
+		this._windowId = v;
 	}
 
 	public get context(): T {
@@ -114,12 +131,12 @@ export class Workspace {
 				Orientation.Horizontal,
 				new ContainerArea(
 					Orientation.Vertical,
-					new LeafArea<string>("hello"),
-					new LeafArea<string>("world"),
+					new LeafArea<unknown>(INIT_AREA_ID, undefined),
+					new LeafArea<unknown>(INIT_AREA_ID, undefined),
 					new AreaSize(1, "fr"),
 					new AreaSize(2, "fr"),
 				),
-				new LeafArea<string>("right"),
+				new LeafArea<unknown>(INIT_AREA_ID, undefined),
 				new AreaSize(1, "fr"),
 				new AreaSize(2, "fr"),
 			),
@@ -186,6 +203,17 @@ export class Workspace {
 			}
 			yield next;
 		}
+	}
+
+	swap(area: IArea, windowId: string, context: unknown) {
+		if (!(area instanceof LeafArea)) {
+			console.error("can not swap container area");
+			return;
+		}
+		area.windowId = windowId;
+		area.context = context;
+		const container = <ContainerArea>this.parents.get(area);
+		container.update.push(ContainerUpdateType.Swap);
 	}
 
 	private insertToParent(area: IArea) {

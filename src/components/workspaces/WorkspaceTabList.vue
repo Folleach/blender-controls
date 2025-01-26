@@ -48,8 +48,14 @@ props.service.update.consume(() => {
 
 <template>
     <div>
-        <div v-if="tabs" style="background: #000;">
+        <div v-if="tabs" class="tab-container">
             <TabList :tabs="tabs.tabs" :append="tabs.append" />
         </div>
     </div>
 </template>
+
+<style lang="css" scoped>
+.tab-container {
+    background-color: var(--cl-bg);
+}
+</style>

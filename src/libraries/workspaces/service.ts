@@ -16,6 +16,7 @@ interface IWorkspaceNode {
 	leftSize: AreaSize | null;
 	rightSize: AreaSize | null;
 	context: object | null;
+	windowId: string | null;
 }
 
 export interface IWorkspaceIndex {
@@ -197,6 +198,7 @@ export class WorkspaceService {
 			return {
 				type: WorkspaceNodeType.Leaf,
 				context: area.context,
+				windowId: area.windowId,
 				left: null,
 				right: null,
 				orientation: null,
@@ -208,6 +210,7 @@ export class WorkspaceService {
 			return {
 				type: WorkspaceNodeType.Container,
 				context: null,
+				windowId: null,
 				left: this.convertArea(area.left),
 				right: this.convertArea(area.right),
 				orientation: area.orientation,
@@ -220,7 +223,7 @@ export class WorkspaceService {
 
 	private convertNode(entry: IWorkspaceNode): IArea {
 		if (entry.type === WorkspaceNodeType.Leaf) {
-			return new LeafArea(entry.context);
+			return new LeafArea(entry.windowId ?? "default", entry.context);
 		}
 		if (entry.type === WorkspaceNodeType.Container) {
 			return new ContainerArea(

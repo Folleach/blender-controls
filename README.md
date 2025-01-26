@@ -28,6 +28,13 @@ npm run storybook
         - [ ] duplicate
         - [ ] reorder
         - [x] remove
+    - [ ] api for inner areas
+        - [x] swap
+        - [ ] split
+        - [ ] find services?
+        - [ ] request size
+    - [x] dynamic areas
+    - [ ] change focus when Ctrl + Tab
 - [ ] menus
     - [x] render
         - [x] item
@@ -44,6 +51,7 @@ npm run storybook
     - [x] global space
     - [ ] nodes
     - [ ] sockets
+    - [ ] properties
     - [ ] groups
     - [ ] areas
 - [ ] routine buttons, etc...

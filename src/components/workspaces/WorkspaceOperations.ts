@@ -2,6 +2,7 @@ import {
 	AreaSize,
 	ContainerArea,
 	ContainerUpdateType,
+	INIT_AREA_ID,
 	LeafArea,
 	Orientation,
 	WorkspaceOperation,
@@ -130,7 +131,7 @@ export function finishSplit(workspace: Workspace, right: boolean, bottom: boolea
 	}
 
 	workspace.split(area, {
-		appendArea: new LeafArea<string>("this area is generated"),
+		appendArea: new LeafArea<string>(INIT_AREA_ID, "none"),
 		firstSize: new AreaSize(firstSize, "fr"),
 		secondSize: new AreaSize(secondSize, "fr"),
 		orientation: orientation,

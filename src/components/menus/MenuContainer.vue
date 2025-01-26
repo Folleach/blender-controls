@@ -3,9 +3,9 @@ import { MenuDirectoryElement, MenuLeaf, MenuSeparatorElement } from "@/librarie
 import { type IMenuSpaceInternal, MENU_SPACE_OVERLAY_KEY, type IMenuContainerProps } from ".";
 import MenuDirectory from "./MenuDirectory.vue";
 import MenuItem from "./MenuItem.vue";
-import MenuSeparator from "./MenuSeparator.vue";
 import { inject, onMounted, useTemplateRef } from "vue";
 import type { Rectangle } from "@/libraries/workspaces";
+import ListSeparator from "../common/ListSeparator.vue";
 
 const props = defineProps<IMenuContainerProps>();
 
@@ -35,8 +35,8 @@ function stopPropagation(e: MouseEvent) {
 		<div class="container-inside">
 			<div v-for="(item, index) in menu.elements()" :key="index"
 				:class="(!(item instanceof MenuSeparatorElement)) ? 'selectable' : ''">
-				<MenuSeparator v-if="(item instanceof MenuSeparatorElement)">
-				</MenuSeparator>
+				<ListSeparator v-if="(item instanceof MenuSeparatorElement)">
+				</ListSeparator>
 				<MenuItem v-if="(item instanceof MenuLeaf)" :item="item">
 				</MenuItem>
 				<MenuDirectory v-if="(item instanceof MenuDirectoryElement)" :directory="item" :depth="depth">
@@ -49,11 +49,11 @@ function stopPropagation(e: MouseEvent) {
 <style lang="css" scoped>
 .container {
 	width: auto;
-	background-color: #1b1b1b;
+	background-color: var(--cl-bg2);
 	border-radius: 0.25rem;
 	padding: 0.35rem 0;
 	border-width: 1px;
-	border-color: color-mix(in srgb, white 15%, transparent 85%);
+	border-color: color-mix(in srgb, var(--cl-tx) 15%, transparent 85%);
 	border-style: solid;
 }
 

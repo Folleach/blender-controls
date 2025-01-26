@@ -1,35 +1,17 @@
 <script setup lang="ts">
-import type { Position } from '@/libraries/workspaces';
 import { computed, onMounted, ref } from 'vue';
+import { MoveOperation } from '../../libraries/common/operations/MoveOperation';
 
 const position = ref({ x: 0, y: 0 });
-const b1: Position = { x: 0, y: 0 };
-const b2: Position = { x: 0, y: 0 };
+const move: MoveOperation = new MoveOperation(p => position.value = p, () => {
+    document.getElementById('app')!.style.cursor = "default";
+});
 
 function handlePointerDown(e: PointerEvent) {
-    if (e.button !== 1)
-        return;
+    if (e.button !== 1) return;
     e.preventDefault();
-
-    b2.x = position.value.x;
-    b2.y = position.value.y;
-    b1.x = e.clientX;
-    b1.y = e.clientY;
-
-    document.addEventListener('pointermove', handlePointerMove);
-    document.addEventListener('pointerup', handlePointerUp);
-};
-
-function handlePointerMove(e: PointerEvent) {
-    position.value = {
-        x: b2.x + (e.clientX - b1.x),
-        y: b2.y + (e.clientY - b1.y),
-    }
-};
-
-function handlePointerUp() {
-    document.removeEventListener('pointermove', handlePointerMove);
-    document.removeEventListener('pointerup', handlePointerUp);
+    move.perform(e, position.value);
+    document.getElementById('app')!.style.cursor = "move";
 };
 
 onMounted(() => {
