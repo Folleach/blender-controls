@@ -5,16 +5,18 @@ import type { IContext } from "../contexts";
 import type { Position, Rectangle } from "../workspaces";
 import { LastPipe, type IPipe } from "../workspaces/bus";
 
+export const CONTEXT_MENU_API = "context-menu-api";
+
 interface IMenuHolder {
 	position: Position;
 	menu: IMenu;
 }
 
-export interface IMenuService {
+export interface IContextMenuApi {
 	set: (menu: IMenu, context: IContext, position?: Position | undefined) => void;
 }
 
-export class MenuService implements IMenuService {
+export class MenuService implements IContextMenuApi {
 	stack: IMenuHolder[] = [];
 	update: IPipe<None> = new LastPipe();
 	rectangles: Map<number, Rectangle> = new Map();

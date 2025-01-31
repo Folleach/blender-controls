@@ -46,14 +46,24 @@ npm run storybook
     - [ ] pointer above the last use
     - [ ] reposition when went outside the page
     - [ ] custom icons
+    - [x] api
+        - [x] set
 - [ ] keyboard shortcuts
 - [ ] node editor
     - [x] global space
-    - [ ] nodes
-    - [ ] sockets
-    - [ ] properties
+        - [ ] api
+            - [x] pointer position in the space
+            - [ ] selection
+    - [x] nodes
+        - [ ] drag and drop outside the current area (and browser)?
+        - [ ] select multiple nodes
+    - [x] sockets
+        - [x] link
+    - [ ] routes
+    - [ ] properties (dynamic content?)
     - [ ] groups
-    - [ ] areas
+    - [ ] frames
+    - [ ] api
 - [ ] routine buttons, etc...
     - [x] tab list
         - [ ] rename on selected click

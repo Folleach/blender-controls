@@ -158,6 +158,8 @@
 	--cl-ui: var(--flexoki-900);
 	--cl-bg2: var(--flexoki-950);
 	--cl-bg: var(--flexoki-black);
+	--cl-ma: var(--flexoki-magenta-400);
+	--cl-ma2: var(--flexoki-magenta-600);
 }
 
 /* light */
@@ -167,6 +169,8 @@
 	--cl-ui: var(--flexoki-100);
 	--cl-bg2: var(--flexoki-50);
 	--cl-bg: var(--flexoki-paper);
+	--cl-ma: var(--flexoki-magenta-600);
+	--cl-ma2: var(--flexoki-magenta-400);
 } */
 
 /* semantic color variables for this project */

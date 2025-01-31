@@ -35,7 +35,7 @@ service.update.consume(() => {
 <template>
   <div v-if="active" class="workspace" :key="key" ref="workspace">
     <div class="inside">
-      <WorkspaceArea :overlay="state" :workspace="active" :area="active.root">hehe</WorkspaceArea>
+      <WorkspaceArea :overlay="state" :workspace="active" :area="active.root"></WorkspaceArea>
     </div>
     <div class="inside overlay">
       <WorkspaceOverlay :state="state" :get-rect-context="getRectContext" />

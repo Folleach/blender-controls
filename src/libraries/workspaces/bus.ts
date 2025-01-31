@@ -24,6 +24,7 @@ export class BroadcastPipe<T> implements IPipe<T> {
 	private last: T | undefined = undefined;
 
 	consume(action: (value: T) => void) {
+		if (this.subscribers.length > 2) console.error("potential leak in the pipes");
 		this.subscribers.push(action);
 		if (this.last) action(this.last);
 	}
