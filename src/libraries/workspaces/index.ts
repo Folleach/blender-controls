@@ -42,6 +42,7 @@ export interface AreaSplitOptions {
 
 export interface IArea {
 	type: string;
+	update: IPipe<AreaUpdateType>;
 }
 
 export interface IWorkspaceContext extends IContext {
@@ -64,7 +65,7 @@ export class AreaSize {
 	}
 }
 
-export enum ContainerUpdateType {
+export enum AreaUpdateType {
 	Resize,
 	Split,
 	Swap,
@@ -77,7 +78,7 @@ export class ContainerArea implements IArea {
 	right: IArea;
 	leftSize: AreaSize;
 	rightSize: AreaSize;
-	update: IPipe<ContainerUpdateType> = new LastPipe();
+	update: IPipe<AreaUpdateType> = new LastPipe();
 
 	constructor(orientation: Orientation, left: IArea, right: IArea, leftSize: AreaSize, rigthSize: AreaSize) {
 		this.orientation = orientation;
@@ -90,6 +91,7 @@ export class ContainerArea implements IArea {
 
 export class LeafArea<T> implements IArea {
 	type: string = "leaf";
+	update: IPipe<AreaUpdateType> = new LastPipe();
 	private _windowId: string;
 	private _context: T;
 
@@ -126,21 +128,7 @@ export class Workspace {
 	}
 
 	static buildDefault(): Workspace {
-		return new Workspace(
-			new ContainerArea(
-				Orientation.Horizontal,
-				new ContainerArea(
-					Orientation.Vertical,
-					new LeafArea<unknown>(INIT_AREA_ID, undefined),
-					new LeafArea<unknown>(INIT_AREA_ID, undefined),
-					new AreaSize(1, "fr"),
-					new AreaSize(2, "fr"),
-				),
-				new LeafArea<unknown>(INIT_AREA_ID, undefined),
-				new AreaSize(1, "fr"),
-				new AreaSize(2, "fr"),
-			),
-		);
+		return new Workspace(new LeafArea<unknown>(INIT_AREA_ID, undefined));
 	}
 
 	findSiblingContainer(area: IArea | undefined, side: Side): ContainerArea | undefined {
@@ -161,19 +149,24 @@ export class Workspace {
 	split(area: IArea, options: AreaSplitOptions) {
 		if (!(area instanceof LeafArea)) return;
 		const parent = <ContainerArea>this.parents.get(area);
-
-		const container = new ContainerArea(
-			options.orientation,
-			area === parent.left ? parent.left : parent.right,
-			options.appendArea,
-			options.firstSize,
-			options.secondSize,
-		);
-		if (area === parent.left) parent.left = container;
-		else parent.right = container;
-
+		if (parent) {
+			const container = new ContainerArea(
+				options.orientation,
+				area === parent.left ? parent.left : parent.right,
+				options.appendArea,
+				options.firstSize,
+				options.secondSize,
+			);
+			if (area === parent.left) parent.left = container;
+			else parent.right = container;
+			this.rebuildParents();
+			parent.update.push(AreaUpdateType.Split);
+			return;
+		}
+		const prev = this.root;
+		this.root = new ContainerArea(options.orientation, this.root, options.appendArea, options.firstSize, options.secondSize);
 		this.rebuildParents();
-		parent.update.push(ContainerUpdateType.Split);
+		prev.update.push(AreaUpdateType.Split);
 	}
 
 	setActualRectangle(area: IArea, rect: Rectangle) {
@@ -206,14 +199,14 @@ export class Workspace {
 	}
 
 	swap(area: IArea, windowId: string, context: unknown) {
+		console.log("swap to", windowId);
 		if (!(area instanceof LeafArea)) {
 			console.error("can not swap container area");
 			return;
 		}
 		area.windowId = windowId;
 		area.context = context;
-		const container = <ContainerArea>this.parents.get(area);
-		container.update.push(ContainerUpdateType.Swap);
+		area.update.push(AreaUpdateType.Swap);
 	}
 
 	private insertToParent(area: IArea) {

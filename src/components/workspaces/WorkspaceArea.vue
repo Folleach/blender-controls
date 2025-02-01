@@ -1,22 +1,27 @@
 <script setup lang="ts">
 import type { IWorkspaceAreaProps } from './WorkspaceAreaProps';
-import { computed, onMounted, ref, useTemplateRef } from 'vue';
+import { computed, onMounted, ref, useTemplateRef, watch, } from 'vue';
 import LeafAreaComponent from './LeafAreaComponent.vue';
-import { ContainerArea, ContainerUpdateType, LeafArea, Orientation, type Rectangle } from '@/libraries/workspaces';
+import { ContainerArea, LeafArea, Orientation, type Rectangle } from '@/libraries/workspaces';
 
 const props = defineProps<IWorkspaceAreaProps>();
 
-const container = props.area instanceof ContainerArea ? props.area as ContainerArea : undefined;
-const forceUpdate = ref(0);
-const sizes = ref({
-  left: container?.leftSize,
-  right: container?.rightSize
-});
+const updateTrigger = ref(0);
+const leafKey = ref(0);
 
-const leaf = props.area instanceof LeafArea ? props.area : null;
-const style = computed(() => {
-  const size = container && `${sizes.value.left?.toString()} 2px ${sizes.value.right?.toString()}`;
-  return container?.orientation === Orientation.Horizontal ? { gridTemplateColumns: size! } : { gridTemplateRows: size! };
+const model = computed(() => {
+  props.area.update.consume(() => updateTrigger.value++);
+  const container = props.area instanceof ContainerArea ? props.area as ContainerArea : undefined;
+  const sizes = { left: container?.leftSize, right: container?.rightSize };
+  const size = container && `${sizes.left?.toString()} 2px ${sizes.right?.toString()}`;
+  // i'm just a clown
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _ = updateTrigger.value;
+  return {
+    container: container,
+    leaf: props.area instanceof LeafArea ? props.area : undefined,
+    containerStyle: container?.orientation === Orientation.Horizontal ? { gridTemplateColumns: size! } : { gridTemplateRows: size! }
+  }
 });
 
 // const ss = props.level ?? 0;
@@ -39,7 +44,7 @@ function updateRect() {
     width: box.width,
     height: box.height,
   };
-  props.workspace.setActualRectangle(leaf ?? container!, rectangle);
+  props.workspace.setActualRectangle(model.value.leaf ?? model.value.container!, rectangle);
 }
 
 onMounted(() => {
@@ -47,29 +52,22 @@ onMounted(() => {
     new ResizeObserver(updateRect).observe(containerElement.value);
 })
 
-function updateContainer(operation: ContainerUpdateType) {
-  sizes.value = {
-    left: container?.leftSize,
-    right: container?.rightSize
-  }
-  if (operation === ContainerUpdateType.Split || operation === ContainerUpdateType.Swap) {
-    forceUpdate.value++;
-  }
-}
-
-container?.update.consume(updateContainer);
+watch(model, updateRect);
+watch([() => model.value.leaf?.windowId, () => model.value.leaf?.context], () => leafKey.value++);
 
 </script>
 
 <template>
-  <div v-if="container" class="root">
-    <div class="template inside" :style="style" ref="containerElement" :key="forceUpdate">
+  <div v-if="model.container" class="root">
+    <div class="template inside" :style="model.containerStyle" ref="containerElement">
       <div class="container">
-        <WorkspaceArea :level="level ? level + 1 : 1" :workspace="workspace" :area="container.left"></WorkspaceArea>
+        <WorkspaceArea :level="level ? level + 1 : 1" :workspace="workspace" :area="model.container.left">
+        </WorkspaceArea>
       </div>
       <div style="display: grid;"></div>
       <div class="container">
-        <WorkspaceArea :level="level ? level + 1 : 1" :workspace="workspace" :area="container.right"></WorkspaceArea>
+        <WorkspaceArea :level="level ? level + 1 : 1" :workspace="workspace" :area="model.container.right">
+        </WorkspaceArea>
       </div>
     </div>
     <!-- <div class="debug-inside debug-border" :style="debugStyle">
@@ -79,7 +77,7 @@ container?.update.consume(updateContainer);
     </div> -->
   </div>
   <div v-else class="template" ref="containerElement">
-    <LeafAreaComponent :workspace="workspace" :area="area" :key="leaf?.context" />
+    <LeafAreaComponent :workspace="workspace" :area="area" :key="leafKey" />
   </div>
 </template>
 

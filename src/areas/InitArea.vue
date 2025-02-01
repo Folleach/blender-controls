@@ -20,7 +20,7 @@ function open(id: string) {
 <template>
     <div v-if="service">
         <ListContainer header="Available Areas">
-            <div v-for="item in service.getAreas()" :key="item.id" :onclick="() => open(item.id)">
+            <div v-for="item in service.getAreas()" :key="item.id">
                 <ListItemComponent :command="new AdHocCommand(() => open(item.id))" :text="item.name" :context="{}" />
             </div>
         </ListContainer>

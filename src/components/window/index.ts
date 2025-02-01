@@ -1,5 +1,5 @@
 import ComponentNotFound from "@/areas/ComponentNotFound.vue";
-import { defineComponent, h, type DefineComponent } from "vue";
+import { defineComponent, type DefineComponent } from "vue";
 
 export type ComponentFactory = () => ReturnType<typeof defineComponent>;
 
