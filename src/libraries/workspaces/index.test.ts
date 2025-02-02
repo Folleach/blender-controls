@@ -1,4 +1,5 @@
-import { ContainerArea, LeafArea, Orientation, Side, Workspace } from "../src";
+import { expect, test } from "@jest/globals";
+import { AreaSize, ContainerArea, LeafArea, Orientation, Side, Workspace } from ".";
 
 test("root should be container", () => {
 	const workspace = Workspace.buildDefault();
@@ -15,11 +16,11 @@ test("right should be leaf", () => {
 });
 
 test("find sibling", () => {
-	const leftFirst = new LeafArea<string>("hello");
-	const leftSecond = new LeafArea<string>("world");
-	const left = new ContainerArea(Orientation.Vertical, leftFirst, leftSecond);
-	const right = new LeafArea<string>("right");
-	const root = new ContainerArea(Orientation.Horizontal, left, right);
+	const leftFirst = new LeafArea("hello", undefined);
+	const leftSecond = new LeafArea("world", undefined);
+	const left = new ContainerArea(Orientation.Vertical, leftFirst, leftSecond, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const right = new LeafArea("right", undefined);
+	const root = new ContainerArea(Orientation.Horizontal, left, right, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const workspace = new Workspace(root);
 
 	const actual1 = workspace.findSiblingContainer(leftSecond, Side.Right);
@@ -33,16 +34,16 @@ test("find sibling", () => {
 });
 
 test("find sibling in many horizontal areas", () => {
-	const a1 = new LeafArea<string>("a1");
-	const a2 = new LeafArea<string>("a2");
-	const a3 = new LeafArea<string>("a3");
-	const a4 = new LeafArea<string>("a4");
-	const a5 = new LeafArea<string>("a5");
+	const a1 = new LeafArea("a1", undefined);
+	const a2 = new LeafArea("a2", undefined);
+	const a3 = new LeafArea("a3", undefined);
+	const a4 = new LeafArea("a4", undefined);
+	const a5 = new LeafArea("a5", undefined);
 
-	const c1 = new ContainerArea(Orientation.Horizontal, a1, a2);
-	const c2 = new ContainerArea(Orientation.Horizontal, c1, a3);
-	const c3 = new ContainerArea(Orientation.Horizontal, c2, a4);
-	const root = new ContainerArea(Orientation.Horizontal, c3, a5);
+	const c1 = new ContainerArea(Orientation.Horizontal, a1, a2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const c2 = new ContainerArea(Orientation.Horizontal, c1, a3, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const c3 = new ContainerArea(Orientation.Horizontal, c2, a4, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const root = new ContainerArea(Orientation.Horizontal, c3, a5, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const workspace = new Workspace(root);
 
 	const actual1 = workspace.findSiblingContainer(a1, Side.Top);
@@ -59,13 +60,13 @@ test("find sibling in many horizontal areas", () => {
 });
 
 test("find sibling: discord example", () => {
-	const a1 = new LeafArea<string>("hello");
-	const a2 = new LeafArea<string>("world");
-	const a3 = new LeafArea<string>("right");
-	const a4 = new LeafArea<string>("additional");
-	const c1 = new ContainerArea(Orientation.Vertical, a1, a2);
-	const c2 = new ContainerArea(Orientation.Horizontal, a3, a4);
-	const root = new ContainerArea(Orientation.Horizontal, c1, c2);
+	const a1 = new LeafArea("hello", undefined);
+	const a2 = new LeafArea("world", undefined);
+	const a3 = new LeafArea("right", undefined);
+	const a4 = new LeafArea("additional", undefined);
+	const c1 = new ContainerArea(Orientation.Vertical, a1, a2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const c2 = new ContainerArea(Orientation.Horizontal, a3, a4, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const root = new ContainerArea(Orientation.Horizontal, c1, c2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const workspace = new Workspace(root);
 
 	expect(workspace.findSiblingContainer(a3, Side.Right)).toBe(c2);

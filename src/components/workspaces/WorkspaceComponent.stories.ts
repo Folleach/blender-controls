@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 
 import WorkspaceComponent from "./WorkspaceComponent.vue";
-import { LocalStorageWorkspaceRepository, WorkspaceService } from "@/libraries/workspaces/service";
 import { Workspace } from "@/libraries/workspaces";
 
 const meta = {
@@ -16,12 +15,11 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const service = new WorkspaceService(new LocalStorageWorkspaceRepository());
-service.add("first", Workspace.buildDefault());
+const workspace = Workspace.buildDefault();
 
 export const Primary: Story = {
 	args: {
-		service,
+		workspace,
 	},
 	render(args) {
 		return {
