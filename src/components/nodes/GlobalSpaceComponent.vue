@@ -3,6 +3,7 @@ import { computed, onMounted, provide, ref, useTemplateRef } from 'vue';
 import { MoveOperation } from '../../libraries/common/operations/MoveOperation';
 import { type IGlobalSpaceApi, NODES_GLOBAL_SPACE_API } from '@/libraries/nodes/api';
 import type { Position } from '@/libraries/workspaces';
+import { ConstantPositionAlignment } from '@/libraries/common/alignment';
 
 const props = defineProps<{
     onPointerPosition?: ((e: Position) => void) | undefined;
@@ -13,7 +14,7 @@ const currentPointerPosition: Position = { x: 0, y: 0 };
 const currentOffset: Position = { x: 0, y: 0 };
 const move: MoveOperation = new MoveOperation(p => position.value = p, () => {
     document.getElementById('app')!.style.cursor = "default";
-});
+}, new ConstantPositionAlignment(1));
 
 function handlePointerDown(e: PointerEvent) {
     if (e.button !== 1) return;

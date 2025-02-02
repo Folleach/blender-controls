@@ -87,7 +87,6 @@ provide(WORKSPACE_API, new WorkspaceApi(props.workspace, leaf));
 
 .leaf {
   overflow: auto;
-  overflow-y: auto;
   height: 100%;
   background: var(--cl-bg2);
 }

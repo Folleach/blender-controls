@@ -32,7 +32,7 @@ function onContext(e: PointerEvent, tab: ITab) {
     display: flex;
     gap: 0.15rem;
     user-select: none;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 .tab {

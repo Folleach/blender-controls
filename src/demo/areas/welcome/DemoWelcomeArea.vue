@@ -64,7 +64,6 @@ getContributors();
 .root {
     text-align: center;
     font-size: 2em;
-    height: 100%;
     background-color: var(--cl-bg2);
 }
 
