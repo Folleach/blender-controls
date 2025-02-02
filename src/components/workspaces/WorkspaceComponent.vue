@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import WorkspaceArea from './WorkspaceArea.vue';
-import { isProxy, provide, ref, toRaw, useTemplateRef } from 'vue';
+import { provide, ref, useTemplateRef } from 'vue';
 import WorkspaceOverlay from './WorkspaceOverlay.vue';
 import type { IOverlayProps } from './WorkspaceAreaProps';
 import { WORKSPACE_OVERLAY_KEY, type IWorkspaceOverlayContext } from './OverlayInjection';
-import { WorkspaceService } from '@/libraries/workspaces/service';
 import { domToRect } from '@/libraries/common/geometry';
-import type { Rectangle } from '@/libraries/workspaces';
+import type { Rectangle, Workspace } from '@/libraries/workspaces';
 
-const props = defineProps<{ service: WorkspaceService }>();
-const service = isProxy(props.service) ? toRaw(props.service) : props.service;
-let active = service.active();
+defineProps<{ workspace: Workspace }>();
+
 const workspaceElement = useTemplateRef("workspace");
 
 function getRectContext(): Rectangle | undefined {
@@ -25,25 +23,15 @@ const context: IWorkspaceOverlayContext = {
 };
 provide<IWorkspaceOverlayContext>(WORKSPACE_OVERLAY_KEY, context);
 
-const key = ref(0);
-service.update.consume(() => {
-  active = service.active();
-  key.value++
-});
 </script>
 
 <template>
-  <div v-if="active" class="workspace" :key="key" ref="workspace">
+  <div class="workspace" ref="workspace">
     <div class="inside">
-      <WorkspaceArea :overlay="state" :workspace="active" :area="active.root"></WorkspaceArea>
+      <WorkspaceArea :overlay="state" :workspace="workspace" :area="workspace.root"></WorkspaceArea>
     </div>
     <div class="inside overlay">
       <WorkspaceOverlay :state="state" :get-rect-context="getRectContext" />
-    </div>
-  </div>
-  <div v-if="!active" class="workspace" :key="key">
-    <div class="warn">
-      <h1>There is an empty workspace here</h1>
     </div>
   </div>
 </template>

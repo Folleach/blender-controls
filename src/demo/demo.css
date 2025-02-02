@@ -1,0 +1,11 @@
+a {
+	color: var(--cl-bl);
+}
+
+a:hover {
+	color: var(--cl-bl2);
+}
+
+a:visited {
+	color: var(--cl-ma);
+}

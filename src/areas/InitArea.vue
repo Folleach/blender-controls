@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import { INIT_WINDOW_SERVICE_KEY } from '@/libraries/window';
-import type { IWorkspaceApiProps } from '@/libraries/workspaces/api';
 import { inject } from 'vue';
 import type { InitAreaService } from '../components/window';
 import ListItemComponent from '@/components/common/ListItemComponent.vue';
 import { AdHocCommand } from '@/libraries/commands/adhocCommand';
 import ListContainer from '@/components/common/ListContainer.vue';
-
-const workspace = defineProps<IWorkspaceApiProps>();
+import { WORKSPACE_API } from '@/components/workspaces';
 
 const service = inject<InitAreaService>(INIT_WINDOW_SERVICE_KEY)
+const workspace = inject(WORKSPACE_API);
 
 function open(id: string) {
-    workspace.api.swap(id);
+    workspace?.swap(id);
 }
 
 </script>

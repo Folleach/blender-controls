@@ -5,7 +5,7 @@ export type ComponentFactory = () => ReturnType<typeof defineComponent>;
 
 export interface IAreaSettings<T> {
 	name: string;
-	defaultContext: T;
+	defaultContext?: T | undefined;
 }
 
 export interface IAreaForCreation {

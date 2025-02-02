@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import MenuSpace from "./components/menus/MenuSpace.vue";
-import WorkspaceComponent from "./components/workspaces/WorkspaceComponent.vue";
 import { CONTEXT_MENU_API, MenuService, type IContextMenuApi } from "./libraries/menus/service";
 import { LocalStorageWorkspaceRepository, WorkspaceService } from "./libraries/workspaces/service";
 import { AreaSize, ContainerArea, LeafArea, Orientation, Workspace } from '@/libraries/workspaces';
@@ -11,6 +10,7 @@ import { InitAreaService } from "./components/window";
 import DebugComponent from "./areas/DebugArea.vue";
 import InitWindowComponent from "./areas/InitArea.vue";
 import NodesArea from "./areas/NodesArea.vue";
+import MultipleWorkspaceComponent from "./components/workspaces/MultipleWorkspaceComponent.vue";
 
 const broadcast = new BroadcastChannel("channel");
 broadcast.addEventListener("message", (a: MessageEvent<{ message: string }>) => {
@@ -64,7 +64,7 @@ provide<IContextMenuApi>(CONTEXT_MENU_API, menuService);
 		<div style="display: grid; grid-template-rows: auto 1fr; height: 100%;">
 			<WorkspaceTabList :service="workspaceService" :menu-service="menuService" />
 			<div style="height: 100%;">
-				<WorkspaceComponent :service="workspaceService" />
+				<MultipleWorkspaceComponent :service="workspaceService" :menu="menuService" />
 			</div>
 		</div>
 

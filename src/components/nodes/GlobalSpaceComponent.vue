@@ -51,9 +51,11 @@ onMounted(() => {
         console.error("failed to watch to global space div");
         return;
     }
-    const offset = spaceRootElement.value.getBoundingClientRect();
-    currentOffset.x = offset?.left ?? 0;
-    currentOffset.y = offset?.top ?? 0
+    new ResizeObserver(() => {
+        const offset = spaceRootElement.value!.getBoundingClientRect();
+        currentOffset.x = offset?.left ?? 0;
+        currentOffset.y = offset?.top ?? 0
+    }).observe(spaceRootElement.value)
 });
 
 </script>

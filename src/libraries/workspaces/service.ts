@@ -35,6 +35,27 @@ export interface IWorkspaceRepository {
 	get: (id: string) => Promise<IWorkspaceEntry | null>;
 }
 
+export class InMemoryWorkspaceRepository implements IWorkspaceRepository {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	async set(entry: IWorkspaceEntry): Promise<boolean> {
+		return false;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	async remove(id: string): Promise<boolean> {
+		return false;
+	}
+
+	async getIndex(): Promise<IWorkspaceIndex[]> {
+		return [];
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	async get(id: string): Promise<IWorkspaceEntry | null> {
+		return null;
+	}
+}
+
 export class LocalStorageWorkspaceRepository implements IWorkspaceRepository {
 	private prefix = "blen-workspaces";
 
@@ -130,13 +151,14 @@ export class WorkspaceService {
 		return await this.load(index[0]);
 	}
 
-	async add(name: string, workspace: Workspace) {
+	async add(name: string, workspace: Workspace): Promise<string> {
 		const index = { id: uuidv4(), name };
 		this.addInternal(index, workspace);
 		const entry = this.toEntry(workspace);
 		if (!entry) throw new Error("failed to create workspace entry to store");
 		await this.repository.set(entry);
 		this.change(index.id);
+		return index.id;
 	}
 
 	active(): Workspace | undefined {

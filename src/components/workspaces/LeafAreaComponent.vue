@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { type ILeafAreaProps } from './WorkspaceAreaProps';
 import { finishSplit, capture as capture, continuesSplit, resizeArea } from './WorkspaceOperations';
-import { inject } from 'vue';
+import { inject, provide } from 'vue';
 import { WORKSPACE_OVERLAY_KEY, type IWorkspaceOverlayContext } from './OverlayInjection';
 import { LeafArea, Side } from '@/libraries/workspaces';
 import { WorkspaceApi } from '@/libraries/workspaces/api';
 import type { InitAreaService } from '../window';
 import { INIT_WINDOW_SERVICE_KEY } from '@/libraries/window';
+import { WORKSPACE_API } from '.';
 
 const props = defineProps<ILeafAreaProps>();
 const leaf = props.area instanceof LeafArea ? props.area : undefined;
@@ -42,14 +43,15 @@ function finish() {
   finishSplit(props.workspace, currentRight, currentBottom);
 }
 
-const api = new WorkspaceApi(props.workspace, leaf);
 const component = windowService?.create(leaf.windowId);
+
+provide(WORKSPACE_API, new WorkspaceApi(props.workspace, leaf));
 
 </script>
 
 <template>
-  <div style="overflow: auto; overflow-y: auto; height: 100%;">
-    <component :is="component" :api="api" />
+  <div class="leaf">
+    <component :is="component" />
   </div>
   <div class="corner"
     v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), (w) => performSplit(e, w, false, false), finish)">
@@ -81,6 +83,13 @@ const component = windowService?.create(leaf.windowId);
 .splitter {
   width: 100%;
   height: 100%;
+}
+
+.leaf {
+  overflow: auto;
+  overflow-y: auto;
+  height: 100%;
+  background: var(--cl-bg2);
 }
 
 .corner {

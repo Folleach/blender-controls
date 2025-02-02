@@ -96,7 +96,7 @@ watch([() => model.value.leaf?.windowId, () => model.value.leaf?.context], () =>
 
 .container {
   border-radius: 0.5em;
-  background-color: var(--cl-ui);
+  background-color: var(--cl-bg2);
   position: relative;
   overflow: auto;
 }

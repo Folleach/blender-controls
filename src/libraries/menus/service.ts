@@ -1,3 +1,4 @@
+import type { InjectionKey } from "vue";
 import type { IMenu } from ".";
 import type { None } from "../common/none";
 import { getPointerPosition } from "../common/pointer";
@@ -5,7 +6,7 @@ import type { IContext } from "../contexts";
 import type { Position, Rectangle } from "../workspaces";
 import { LastPipe, type IPipe } from "../workspaces/bus";
 
-export const CONTEXT_MENU_API = "context-menu-api";
+export const CONTEXT_MENU_API = Symbol() as InjectionKey<IContextMenuApi>;
 
 interface IMenuHolder {
 	position: Position;
