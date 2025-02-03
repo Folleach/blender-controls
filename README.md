@@ -20,7 +20,7 @@ npm run storybook
     - [ ] join areas
     - [x] store workspace layouts
     - [ ] separator context menu
-        - [ ] swap area
+        - [x] swap area
         - [ ] join left/right
     - [ ] workspace tabs
         - [x] basic

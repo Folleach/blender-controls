@@ -22,9 +22,9 @@ const areaSizes: Map<IArea, AreaSize[]> = new Map();
 let perform: (e: PointerEvent) => void;
 let end: (() => void) | undefined;
 
-export function resizeArea(e: PointerEvent, workspace: Workspace, area: IArea, side: Side) {
+export function resizeArea(e: PointerEvent, workspace: Workspace, area: IArea, side?: Side) {
 	contexted(last, e);
-	const container = workspace.findSiblingContainer(area, side);
+	const container = area instanceof ContainerArea ? area : workspace.findSiblingContainer(area, side);
 	if (!container) {
 		console.error("failed to resize, this is not container", container);
 		return;

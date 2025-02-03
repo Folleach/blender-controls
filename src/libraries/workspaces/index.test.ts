@@ -1,14 +1,32 @@
 import { expect, test } from "@jest/globals";
-import { AreaSize, ContainerArea, LeafArea, Orientation, Side, Workspace } from ".";
+import { AreaSize, ContainerArea, INIT_AREA_ID, LeafArea, Orientation, Side, Workspace } from ".";
+
+function forTest() {
+	return new Workspace(
+		new ContainerArea(
+			Orientation.Horizontal,
+			new ContainerArea(
+				Orientation.Vertical,
+				new LeafArea<string>(INIT_AREA_ID, "hello"),
+				new LeafArea<string>(INIT_AREA_ID, "world"),
+				new AreaSize(1, "fr"),
+				new AreaSize(2, "fr"),
+			),
+			new LeafArea<string>(INIT_AREA_ID, "right"),
+			new AreaSize(1, "fr"),
+			new AreaSize(2, "fr"),
+		),
+	);
+}
 
 test("root should be container", () => {
-	const workspace = Workspace.buildDefault();
+	const workspace = forTest();
 
 	expect(workspace.root.type).toBe("container");
 });
 
 test("right should be leaf", () => {
-	const workspace = Workspace.buildDefault();
+	const workspace = forTest();
 
 	expect(workspace.root).toBeInstanceOf(ContainerArea);
 
@@ -75,4 +93,49 @@ test("find sibling: discord example", () => {
 	expect(workspace.findSiblingContainer(a2, Side.Top)).toBe(c1);
 	expect(workspace.findSiblingContainer(a1, Side.Left)).toBeUndefined();
 	expect(workspace.findSiblingContainer(a3, Side.Left)).toBe(root);
+});
+
+test("find nearest leaf", () => {
+	const a1 = new LeafArea("hello", undefined);
+	const a2 = new LeafArea("world", undefined);
+	const a3 = new LeafArea("right", undefined);
+	const a4 = new LeafArea("additional", undefined);
+	const c1 = new ContainerArea(Orientation.Vertical, a1, a2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const c2 = new ContainerArea(Orientation.Horizontal, a3, a4, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const root = new ContainerArea(Orientation.Horizontal, c1, c2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const workspace = new Workspace(root);
+
+	expect(workspace.findNearestDescent(root, Side.Right)).toBe(a3);
+	expect(workspace.findNearestDescent(root, Side.Left)).toBe(c1);
+	expect(workspace.findNearestDescent(c1, Side.Top)).toBe(a1);
+	expect(workspace.findNearestDescent(c1, Side.Bottom)).toBe(a2);
+	expect(workspace.findNearestDescent(c2, Side.Left)).toBe(a3);
+	expect(workspace.findNearestDescent(c2, Side.Right)).toBe(a4);
+});
+
+test("swap tree", () => {
+	const a1 = new LeafArea("hello", undefined);
+	const a2 = new LeafArea("world", undefined);
+	const a3 = new LeafArea("right", undefined);
+	const a4 = new LeafArea("additional", undefined);
+	const c1 = new ContainerArea(Orientation.Vertical, a1, a2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const c2 = new ContainerArea(Orientation.Horizontal, a3, a4, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const root = new ContainerArea(Orientation.Horizontal, c1, c2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const workspace = new Workspace(root);
+
+	workspace.swapTree(root);
+	expect((workspace.root as ContainerArea).left).toBe(a3);
+	expect((workspace.root as ContainerArea).right).toBe(c2);
+	expect(((workspace.root as ContainerArea).right as ContainerArea).left).toBe(c1);
+});
+
+test("swap tree with one container", () => {
+	const a1 = new LeafArea("hello", undefined);
+	const a2 = new LeafArea("world", undefined);
+	const c1 = new ContainerArea(Orientation.Horizontal, a1, a2, AreaSize.one, AreaSize.one);
+	const workspace = new Workspace(c1);
+
+	workspace.swapTree(c1);
+	expect(c1.left).toBe(a2);
+	expect(c1.right).toBe(a1);
 });

@@ -47,6 +47,20 @@ const component = windowService?.create(leaf.windowId);
 
 provide(WORKSPACE_API, new WorkspaceApi(props.workspace, leaf));
 
+function onResizeDown(e: PointerEvent, side: Side) {
+  if (e.button === 0) {
+    capture(e, props.workspace, overlay?.getRectContext(), w => performResize(w, side));
+    return;
+  }
+  if (e.button === 2) {
+    const sibling = props.workspace.findSiblingContainer(leaf, side);
+    if (!sibling)
+      return;
+    props.onResizeContext(sibling);
+    return;
+  }
+}
+
 </script>
 
 <template>
@@ -65,17 +79,13 @@ provide(WORKSPACE_API, new WorkspaceApi(props.workspace, leaf));
   <div class="corner bottom-right"
     v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), (w) => performSplit(e, w, true, true), finish)">
   </div>
-  <div class="side top"
-    v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), w => performResize(w, Side.Top))">
+  <div class="side top" v-on:pointerdown="(e) => onResizeDown(e, Side.Top)">
   </div>
-  <div class="side right"
-    v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), w => performResize(w, Side.Right))">
+  <div class="side right" v-on:pointerdown="(e) => onResizeDown(e, Side.Right)">
   </div>
-  <div class="side bottom"
-    v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), w => performResize(w, Side.Bottom))">
+  <div class="side bottom" v-on:pointerdown="(e) => onResizeDown(e, Side.Bottom)">
   </div>
-  <div class="side left"
-    v-on:pointerdown="(e) => capture(e, workspace, overlay?.getRectContext(), w => performResize(w, Side.Left))">
+  <div class="side left" v-on:pointerdown="(e) => onResizeDown(e, Side.Left)">
   </div>
 </template>
 

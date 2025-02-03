@@ -49,7 +49,6 @@ function setPointerPosition(e: PointerEvent) {
 const spaceRootElement = useTemplateRef<HTMLDivElement>("element");
 onMounted(() => {
     if (!spaceRootElement.value) {
-        console.error("failed to watch to global space div");
         return;
     }
     new ResizeObserver(() => {

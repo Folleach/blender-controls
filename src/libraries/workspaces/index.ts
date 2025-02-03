@@ -63,6 +63,10 @@ export class AreaSize {
 	toString(): string {
 		return `${this.size}${this.unit}`;
 	}
+
+	static get one(): AreaSize {
+		return new AreaSize(1, "fr");
+	}
 }
 
 export enum AreaUpdateType {
@@ -131,8 +135,9 @@ export class Workspace {
 		return new Workspace(new LeafArea<unknown>(INIT_AREA_ID, undefined));
 	}
 
-	findSiblingContainer(area: IArea | undefined, side: Side): ContainerArea | undefined {
-		if (area instanceof ContainerArea || !area) return area;
+	findSiblingContainer(area: IArea | undefined, side?: Side): ContainerArea | undefined {
+		if (area instanceof ContainerArea) return area;
+		if (!area) return undefined;
 		let current: IArea = area;
 		while (true) {
 			const prev: IArea = current;
@@ -143,6 +148,14 @@ export class Workspace {
 			if (side === Side.Top && current.orientation === Orientation.Vertical && current.right === prev) return current;
 			if (side === Side.Right && current.orientation === Orientation.Horizontal && current.left === prev) return current;
 			if (side === Side.Left && current.orientation === Orientation.Horizontal && current.right === prev) return current;
+		}
+	}
+
+	findNearestDescent(area: ContainerArea, side: Side): IArea {
+		let current = side === Side.Left || side === Side.Top ? area.left : area.right;
+		while (true) {
+			if (!(current instanceof ContainerArea) || area.orientation !== current.orientation) return current;
+			current = side === Side.Left || side === Side.Top ? current.right : current.left;
 		}
 	}
 
@@ -207,6 +220,26 @@ export class Workspace {
 		area.windowId = windowId;
 		area.context = context;
 		area.update.push(AreaUpdateType.Swap);
+	}
+
+	swapTree(container?: ContainerArea) {
+		if (!container) return;
+
+		const left = this.findNearestDescent(container, Side.Left);
+		const right = this.findNearestDescent(container, Side.Right);
+
+		const first = <ContainerArea>this.parents.get(left);
+		const second = <ContainerArea>this.parents.get(right);
+
+		if (first.left === left) first.left = right;
+		else first.right = right;
+		if (second.right === right) second.right = left;
+		else second.left = left;
+
+		this.rebuildParents();
+		container.update.push(AreaUpdateType.Swap);
+		first.update.push(AreaUpdateType.Swap);
+		second.update.push(AreaUpdateType.Swap);
 	}
 
 	private insertToParent(area: IArea) {

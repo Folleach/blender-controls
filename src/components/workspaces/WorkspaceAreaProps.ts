@@ -1,5 +1,5 @@
 import type { IContextMenuApi } from "@/libraries/menus/service";
-import type { IArea, Orientation, Rectangle, Workspace, WorkspaceOperation } from "@/libraries/workspaces";
+import type { ContainerArea, IArea, Orientation, Rectangle, Workspace, WorkspaceOperation } from "@/libraries/workspaces";
 import type { WorkspaceService } from "@/libraries/workspaces/service";
 
 export interface IWorkspaceAreaProps {
@@ -16,6 +16,7 @@ export interface IContainerAreaProps {
 export interface ILeafAreaProps {
 	area: IArea;
 	workspace: Workspace;
+	onResizeContext: (area: ContainerArea) => void;
 }
 
 export interface IOverlayProps {

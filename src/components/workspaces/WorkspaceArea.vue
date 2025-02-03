@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import type { IWorkspaceAreaProps } from './WorkspaceAreaProps';
-import { computed, onMounted, ref, useTemplateRef, watch, } from 'vue';
+import { computed, inject, onMounted, ref, useTemplateRef, watch, } from 'vue';
 import LeafAreaComponent from './LeafAreaComponent.vue';
 import { ContainerArea, LeafArea, Orientation, type Rectangle } from '@/libraries/workspaces';
+import { capture, resizeArea } from './WorkspaceOperations';
+import { WORKSPACE_OVERLAY_KEY, type IWorkspaceOverlayContext } from './OverlayInjection';
+import { CONTEXT_MENU_API } from '@/libraries/menus/service';
+import { Menu, MenuLeaf } from '@/libraries/menus';
+import { AdHocCommand } from '@/libraries/commands/adhocCommand';
 
 const props = defineProps<IWorkspaceAreaProps>();
 
@@ -55,6 +60,38 @@ onMounted(() => {
 watch(model, updateRect);
 watch([() => model.value.leaf?.windowId, () => model.value.leaf?.context], () => leafKey.value++);
 
+const overlay = inject<IWorkspaceOverlayContext>(WORKSPACE_OVERLAY_KEY);
+const menuApi = inject(CONTEXT_MENU_API);
+
+const menu = new Menu([
+  new MenuLeaf("Swap Areas", new AdHocCommand(c => {
+    const context = <{ area: ContainerArea }>c;
+    if (!context.area)
+      return;
+    props.workspace.swapTree(context.area);
+  }))
+]);
+
+function performResize(e: PointerEvent) {
+  resizeArea(e, props.workspace, props.area);
+  window.getSelection()?.removeAllRanges();
+}
+
+function onResizeDown(e: PointerEvent) {
+  if (e.button === 0) {
+    capture(e, props.workspace, overlay?.getRectContext(), performResize);
+    return;
+  }
+  if (e.button === 2 && model.value.container) {
+    showResizeContext(model.value.container);
+    return;
+  }
+}
+
+function showResizeContext(area: ContainerArea) {
+  menuApi?.set(menu, { area });
+}
+
 </script>
 
 <template>
@@ -64,7 +101,9 @@ watch([() => model.value.leaf?.windowId, () => model.value.leaf?.context], () =>
         <WorkspaceArea :level="level ? level + 1 : 1" :workspace="workspace" :area="model.container.left">
         </WorkspaceArea>
       </div>
-      <div style="display: grid;"></div>
+      <div class="separator"
+        :style="{ cursor: model.container.orientation === Orientation.Horizontal ? 'col-resize' : 'row-resize' }"
+        @pointerdown="onResizeDown"></div>
       <div class="container">
         <WorkspaceArea :level="level ? level + 1 : 1" :workspace="workspace" :area="model.container.right">
         </WorkspaceArea>
@@ -77,7 +116,7 @@ watch([() => model.value.leaf?.windowId, () => model.value.leaf?.context], () =>
     </div> -->
   </div>
   <div v-else class="template" ref="containerElement">
-    <LeafAreaComponent :workspace="workspace" :area="area" :key="leafKey" />
+    <LeafAreaComponent :workspace="workspace" :area="area" :key="leafKey" @resize-context="showResizeContext" />
   </div>
 </template>
 
@@ -99,6 +138,11 @@ watch([() => model.value.leaf?.windowId, () => model.value.leaf?.context], () =>
   background-color: var(--cl-bg2);
   position: relative;
   overflow: auto;
+}
+
+.separator {
+  display: grid;
+  height: 100%;
 }
 
 .inside {
