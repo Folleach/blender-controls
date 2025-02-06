@@ -19,7 +19,7 @@ export interface IContextMenuApi {
 
 export class MenuService implements IContextMenuApi {
 	stack: IMenuHolder[] = [];
-	update: IPipe<None> = new LastPipe();
+	update: IPipe<None, None> = new LastPipe();
 	rectangles: Map<number, Rectangle> = new Map();
 	context: IContext = {};
 

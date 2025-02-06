@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { IWorkspaceAreaProps } from './WorkspaceAreaProps';
-import { computed, inject, onMounted, ref, useTemplateRef, watch, } from 'vue';
+import { computed, inject, ref, useTemplateRef, watch, } from 'vue';
 import LeafAreaComponent from './LeafAreaComponent.vue';
 import { ContainerArea, LeafArea, Orientation, type Rectangle } from '@/libraries/workspaces';
 import { capture, resizeArea } from './WorkspaceOperations';
@@ -11,12 +11,34 @@ import { AdHocCommand } from '@/libraries/commands/adhocCommand';
 
 const props = defineProps<IWorkspaceAreaProps>();
 
+function current() {
+  return props.area ?? props.workspace.root;
+}
+
 const updateTrigger = ref(0);
 const leafKey = ref(0);
 
+const containerElement = useTemplateRef<HTMLDivElement>('containerElement');
+
+function updateRect() {
+  const box = containerElement.value?.getBoundingClientRect();
+  if (!box) {
+    return;
+  }
+  const rectangle: Rectangle = {
+    x: box.left,
+    y: box.top,
+    width: box.width,
+    height: box.height,
+  };
+  props.workspace.setActualRectangle(model.value.leaf ?? model.value.container!, rectangle);
+}
+
 const model = computed(() => {
-  props.area.update.consume(() => updateTrigger.value++);
-  const container = props.area instanceof ContainerArea ? props.area as ContainerArea : undefined;
+  const area = current();
+  area.update.consume({}, () => updateTrigger.value++);
+
+  const container = area instanceof ContainerArea ? area as ContainerArea : undefined;
   const sizes = { left: container?.leftSize, right: container?.rightSize };
   const size = container && `${sizes.left?.toString()} 2px ${sizes.right?.toString()}`;
   // i'm just a clown
@@ -24,7 +46,7 @@ const model = computed(() => {
   const _ = updateTrigger.value;
   return {
     container: container,
-    leaf: props.area instanceof LeafArea ? props.area : undefined,
+    leaf: area instanceof LeafArea ? area : undefined,
     containerStyle: container?.orientation === Orientation.Horizontal ? { gridTemplateColumns: size! } : { gridTemplateRows: size! }
   }
 });
@@ -37,27 +59,11 @@ const model = computed(() => {
 //   bottom: `${ss * 10}px`,
 // }
 
-const containerElement = useTemplateRef<HTMLDivElement>('containerElement');
-
-function updateRect() {
-  const box = containerElement.value?.getBoundingClientRect();
-  if (!box)
-    return;
-  const rectangle: Rectangle = {
-    x: box.left,
-    y: box.top,
-    width: box.width,
-    height: box.height,
-  };
-  props.workspace.setActualRectangle(model.value.leaf ?? model.value.container!, rectangle);
-}
-
-onMounted(() => {
+watch(model, updateRect);
+watch(containerElement, () => {
   if (containerElement.value)
     new ResizeObserver(updateRect).observe(containerElement.value);
-})
-
-watch(model, updateRect);
+});
 watch([() => model.value.leaf?.windowId, () => model.value.leaf?.context], () => leafKey.value++);
 
 const overlay = inject<IWorkspaceOverlayContext>(WORKSPACE_OVERLAY_KEY);
@@ -73,7 +79,7 @@ const menu = new Menu([
 ]);
 
 function performResize(e: PointerEvent) {
-  resizeArea(e, props.workspace, props.area);
+  resizeArea(e, props.workspace, current());
   window.getSelection()?.removeAllRanges();
 }
 
@@ -116,7 +122,7 @@ function showResizeContext(area: ContainerArea) {
     </div> -->
   </div>
   <div v-else class="template" ref="containerElement">
-    <LeafAreaComponent :workspace="workspace" :area="area" :key="leafKey" @resize-context="showResizeContext" />
+    <LeafAreaComponent :workspace="workspace" :area="current()" :key="leafKey" @resize-context="showResizeContext" />
   </div>
 </template>
 

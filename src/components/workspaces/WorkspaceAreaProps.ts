@@ -3,7 +3,7 @@ import type { ContainerArea, IArea, Orientation, Rectangle, Workspace, Workspace
 import type { WorkspaceService } from "@/libraries/workspaces/service";
 
 export interface IWorkspaceAreaProps {
-	area: IArea;
+	area?: IArea | undefined;
 	workspace: Workspace;
 	level?: number;
 }
@@ -21,9 +21,9 @@ export interface ILeafAreaProps {
 
 export interface IOverlayProps {
 	rectangle: Rectangle | undefined;
-	orientation: Orientation;
-	size: number;
-	operation: WorkspaceOperation;
+	orientation?: Orientation;
+	size?: number;
+	operation?: WorkspaceOperation;
 }
 
 export interface IWorkspaceTabListProps {

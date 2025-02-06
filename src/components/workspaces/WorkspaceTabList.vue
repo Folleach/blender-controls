@@ -27,7 +27,7 @@ const contextMenu = new Menu([
     }))
 ])
 
-props.service.update.consume(() => {
+props.service.update.consume('tab-list', () => {
     const current = props.service._active;
     const t: ITab[] = [...props.service.getIndex().map(x => {
         const tab: ITab = {

@@ -1,3 +1,4 @@
+import type { None } from "../common/none";
 import type { IContext } from "../contexts";
 import { LastPipe, type IPipe } from "./bus";
 import { intersect2d } from "./geometry";
@@ -38,11 +39,12 @@ export interface AreaSplitOptions {
 	firstSize: AreaSize;
 	secondSize: AreaSize;
 	appendArea: IArea;
+	left: boolean;
 }
 
 export interface IArea {
 	type: string;
-	update: IPipe<AreaUpdateType>;
+	update: IPipe<None, AreaUpdateType>;
 }
 
 export interface IWorkspaceContext extends IContext {
@@ -73,6 +75,7 @@ export enum AreaUpdateType {
 	Resize,
 	Split,
 	Swap,
+	SwapTree,
 }
 
 export class ContainerArea implements IArea {
@@ -82,7 +85,7 @@ export class ContainerArea implements IArea {
 	right: IArea;
 	leftSize: AreaSize;
 	rightSize: AreaSize;
-	update: IPipe<AreaUpdateType> = new LastPipe();
+	update: IPipe<None, AreaUpdateType> = new LastPipe();
 
 	constructor(orientation: Orientation, left: IArea, right: IArea, leftSize: AreaSize, rigthSize: AreaSize) {
 		this.orientation = orientation;
@@ -95,7 +98,7 @@ export class ContainerArea implements IArea {
 
 export class LeafArea<T> implements IArea {
 	type: string = "leaf";
-	update: IPipe<AreaUpdateType> = new LastPipe();
+	update: IPipe<None, AreaUpdateType> = new LastPipe();
 	private _windowId: string;
 	private _context: T;
 
@@ -163,10 +166,11 @@ export class Workspace {
 		if (!(area instanceof LeafArea)) return;
 		const parent = <ContainerArea>this.parents.get(area);
 		if (parent) {
+			const current = area === parent.left ? parent.left : parent.right;
 			const container = new ContainerArea(
 				options.orientation,
-				area === parent.left ? parent.left : parent.right,
-				options.appendArea,
+				options.left ? options.appendArea : current,
+				options.left ? current : options.appendArea,
 				options.firstSize,
 				options.secondSize,
 			);
@@ -177,7 +181,13 @@ export class Workspace {
 			return;
 		}
 		const prev = this.root;
-		this.root = new ContainerArea(options.orientation, this.root, options.appendArea, options.firstSize, options.secondSize);
+		this.root = new ContainerArea(
+			options.orientation,
+			options.left ? options.appendArea : this.root,
+			options.left ? this.root : options.appendArea,
+			options.firstSize,
+			options.secondSize,
+		);
 		this.rebuildParents();
 		prev.update.push(AreaUpdateType.Split);
 	}
@@ -212,7 +222,6 @@ export class Workspace {
 	}
 
 	swap(area: IArea, windowId: string, context: unknown) {
-		console.log("swap to", windowId);
 		if (!(area instanceof LeafArea)) {
 			console.error("can not swap container area");
 			return;
@@ -237,9 +246,51 @@ export class Workspace {
 		else second.left = left;
 
 		this.rebuildParents();
-		container.update.push(AreaUpdateType.Swap);
-		first.update.push(AreaUpdateType.Swap);
-		second.update.push(AreaUpdateType.Swap);
+		container.update.push(AreaUpdateType.SwapTree);
+		first.update.push(AreaUpdateType.SwapTree);
+		second.update.push(AreaUpdateType.SwapTree);
+	}
+
+	remove(area: IArea) {
+		if (area === this.root) {
+			return;
+		}
+
+		const parent = <ContainerArea>this.parents.get(area);
+
+		const sibling = parent.left === area ? parent.right : parent.left;
+
+		const nodesToRemove = new Set<IArea>();
+		nodesToRemove.add(parent);
+		nodesToRemove.add(area);
+
+		const stack: IArea[] = [area];
+		while (stack.length > 0) {
+			const current = stack.pop()!;
+			if (current instanceof ContainerArea) {
+				nodesToRemove.add(current.left);
+				stack.push(current.left);
+				nodesToRemove.add(current.right);
+				stack.push(current.right);
+			}
+		}
+
+		nodesToRemove.forEach((node) => this.rectangles.delete(node));
+
+		const prev = this.root;
+		const grandparent = <ContainerArea>this.parents.get(parent);
+		if (grandparent) {
+			if (grandparent.left === parent) {
+				grandparent.left = sibling;
+			} else {
+				grandparent.right = sibling;
+			}
+		} else {
+			this.root = sibling;
+		}
+
+		this.rebuildParents();
+		(grandparent || prev).update.push(AreaUpdateType.Resize);
 	}
 
 	private insertToParent(area: IArea) {

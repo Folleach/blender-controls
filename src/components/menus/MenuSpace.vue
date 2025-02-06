@@ -41,7 +41,7 @@ window.addEventListener('pointermove', (e: PointerEvent) => {
 		internal.service.update.push({});
 });
 
-props.service.update.consume(() => {
+props.service.update.consume({}, () => {
 	softCloseDistance = Number.MAX_VALUE;
 	key.value++
 })

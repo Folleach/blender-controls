@@ -5,14 +5,15 @@ import {
 	INIT_AREA_ID,
 	LeafArea,
 	Orientation,
+	Side,
 	WorkspaceOperation,
 	type IArea,
 	type Position,
 	type Rectangle,
-	type Side,
 	type Workspace,
 } from "@/libraries/workspaces";
 import type { IOverlayProps } from "./WorkspaceAreaProps";
+import { closestSide } from "@/libraries/common/geometry";
 
 const start = { x: 0, y: 0 };
 const last = { x: 0, y: 0 };
@@ -79,16 +80,18 @@ export function continuesSplit(
 	contexted(last, current);
 	const firstArea = workspace.findArea(start, (x) => x instanceof LeafArea);
 	const area = workspace.findArea(last, (x) => x instanceof LeafArea);
-	if (!area) return undefined;
+	if (!area) {
+		return undefined;
+	}
 
-	const areaSize = workspace.findSize(area) ?? {
-		x: 10,
-		y: 10,
-		width: 0,
-		height: 0,
-	};
+	const areaSize = workspace.findSize(area) ?? { x: 10, y: 10, width: 0, height: 0 };
+
 	const delta = { x: right ? start.x - last.x : last.x - start.x, y: bottom ? start.y - last.y : last.y - start.y };
 	const orientation = delta.x > delta.y ? Orientation.Horizontal : Orientation.Vertical;
+
+	if (area !== firstArea) {
+		return { rectangle: getNearestRectangle(areaSize) };
+	}
 
 	return {
 		orientation,
@@ -108,14 +111,41 @@ export function finishSplit(workspace: Workspace, right: boolean, bottom: boolea
 		console.error("area not found");
 		return;
 	}
-	// todo: there are various joins
-	if (area !== firstArea) return;
-	const areaSize = workspace.findSize(area) ?? {
-		x: 10,
-		y: 10,
-		width: 0,
-		height: 0,
-	};
+
+	const areaSize = workspace.findSize(area) ?? { x: 10, y: 10, width: 0, height: 0 };
+
+	if (area !== firstArea) {
+		if (!firstArea) return;
+		const side = closestSide(last, areaSize);
+		const rect = getNearestRectangle(areaSize);
+		workspace.remove(firstArea);
+		let first: number = 0;
+		let second: number = 0;
+		if (side === Side.Left) {
+			first = rect.width;
+			second = areaSize.width - rect.width;
+		}
+		if (side === Side.Top) {
+			first = rect.height;
+			second = areaSize.height - rect.height;
+		}
+		if (side === Side.Right) {
+			second = rect.width;
+			first = areaSize.width - rect.width;
+		}
+		if (side === Side.Bottom) {
+			second = rect.height;
+			first = areaSize.height - rect.height;
+		}
+		workspace.split(area, {
+			appendArea: firstArea,
+			firstSize: new AreaSize(first, "fr"),
+			secondSize: new AreaSize(second, "fr"),
+			orientation: side === Side.Top || side === Side.Bottom ? Orientation.Vertical : Orientation.Horizontal,
+			left: side === Side.Left || side === Side.Top,
+		});
+		return;
+	}
 	const delta = { x: right ? start.x - last.x : last.x - start.x, y: bottom ? start.y - last.y : last.y - start.y };
 	const orientation = delta.x > delta.y ? Orientation.Horizontal : Orientation.Vertical;
 
@@ -135,6 +165,7 @@ export function finishSplit(workspace: Workspace, right: boolean, bottom: boolea
 		firstSize: new AreaSize(firstSize, "fr"),
 		secondSize: new AreaSize(secondSize, "fr"),
 		orientation: orientation,
+		left: false,
 	});
 }
 
@@ -162,6 +193,16 @@ export function capture(
 
 function getDelta(): Position {
 	return { x: last.x - start.x, y: last.y - start.y };
+}
+
+function getNearestRectangle(areaSize: Rectangle): Rectangle {
+	const side = closestSide(last, areaSize);
+	if (side === Side.Bottom)
+		return { ...areaSize, y: last.y + (context?.y ?? 0), height: areaSize.height - (last.y - areaSize.y) - (context?.y ?? 0) };
+	if (side === Side.Right) return { ...areaSize, x: last.x, width: areaSize.width - (last.x - areaSize.x) };
+	if (side === Side.Top) return { ...areaSize, y: areaSize.y, height: last.y - areaSize.y + (context?.y ?? 0) };
+	if (side === Side.Left) return { ...areaSize, x: areaSize.x, width: last.x - areaSize.x };
+	return { x: 0, y: 0, width: 0, height: 0 };
 }
 
 function normalizeSizes(workspace: Workspace) {

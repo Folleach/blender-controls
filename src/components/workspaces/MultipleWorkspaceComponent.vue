@@ -14,8 +14,7 @@ const service = isProxy(props.service) ? toRaw(props.service) : props.service;
 let active = service.active();
 
 const key = ref(0);
-service.update.consume(() => {
-    console.log("update");
+service.update.consume('workspace', () => {
     active = service.active();
     key.value++
 });

@@ -28,11 +28,14 @@ provide<IWorkspaceOverlayContext>(WORKSPACE_OVERLAY_KEY, context);
 <template>
   <div class="workspace" ref="workspace">
     <div class="inside">
-      <WorkspaceArea :overlay="state" :workspace="workspace" :area="workspace.root"></WorkspaceArea>
+      <WorkspaceArea :overlay="state" :workspace="workspace"></WorkspaceArea>
     </div>
     <div class="inside overlay">
       <WorkspaceOverlay :state="state" :get-rect-context="getRectContext" />
     </div>
+    <!-- <div class="inside" :style="{ pointerEvents: 'none' }">
+      <RectOverlayDebugArea :workspace="workspace" />
+    </div> -->
   </div>
 </template>
 

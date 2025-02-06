@@ -1,7 +1,7 @@
 import { expect, test } from "@jest/globals";
 import { AreaSize, ContainerArea, INIT_AREA_ID, LeafArea, Orientation, Side, Workspace } from ".";
 
-function forTest() {
+function createCase1() {
 	return new Workspace(
 		new ContainerArea(
 			Orientation.Horizontal,
@@ -20,13 +20,13 @@ function forTest() {
 }
 
 test("root should be container", () => {
-	const workspace = forTest();
+	const workspace = createCase1();
 
 	expect(workspace.root.type).toBe("container");
 });
 
 test("right should be leaf", () => {
-	const workspace = forTest();
+	const workspace = createCase1();
 
 	expect(workspace.root).toBeInstanceOf(ContainerArea);
 
@@ -138,4 +138,32 @@ test("swap tree with one container", () => {
 	workspace.swapTree(c1);
 	expect(c1.left).toBe(a2);
 	expect(c1.right).toBe(a1);
+});
+
+test("remove: container", () => {
+	const a1 = new LeafArea("hello", undefined);
+	const a2 = new LeafArea("world", undefined);
+	const a3 = new LeafArea("right", undefined);
+	const a4 = new LeafArea("additional", undefined);
+	const c1 = new ContainerArea(Orientation.Vertical, a1, a2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const c2 = new ContainerArea(Orientation.Horizontal, a3, a4, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const root = new ContainerArea(Orientation.Horizontal, c1, c2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const workspace = new Workspace(root);
+
+	workspace.remove(c2);
+	expect(workspace.root).toBe(c1);
+});
+
+test("remove: area", () => {
+	const a1 = new LeafArea("hello", undefined);
+	const a2 = new LeafArea("world", undefined);
+	const a3 = new LeafArea("right", undefined);
+	const a4 = new LeafArea("additional", undefined);
+	const c1 = new ContainerArea(Orientation.Vertical, a1, a2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const c2 = new ContainerArea(Orientation.Horizontal, a3, a4, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const root = new ContainerArea(Orientation.Horizontal, c1, c2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+	const workspace = new Workspace(root);
+
+	workspace.remove(a3);
+	expect((workspace.root as ContainerArea).right).toBe(a4);
 });

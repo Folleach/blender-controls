@@ -129,7 +129,7 @@ export class WorkspaceService {
 	private index: IWorkspaceIndex[] = [];
 	private repository: IWorkspaceRepository;
 	_active: string | undefined;
-	update: IPipe<None> = new BroadcastPipe();
+	update: IPipe<string, None> = new BroadcastPipe();
 
 	constructor(repository: IWorkspaceRepository) {
 		this.repository = repository;

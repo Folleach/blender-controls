@@ -20,7 +20,7 @@ const style = computed(() => {
   }
 });
 const line = computed(() => {
-  if (!props.state?.rectangle || props.state.operation !== WorkspaceOperation.Split)
+  if (!props.state?.rectangle || props.state.operation !== WorkspaceOperation.Split || !props.state.size)
     return undefined;
   const context = props.getRectContext();
   return {

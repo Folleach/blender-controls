@@ -18,10 +18,14 @@ npm run storybook
     - [x] move areas
     - [x] split areas
     - [ ] join areas
+        - [ ] simple (when a1 and a2 inside c1)
+        - [ ] foreign (when a1 and a2 visually neighbour but inside different containers)
+        - [x] advanced (place everywhere)
     - [x] store workspace layouts
+    - [ ] operating with a geometric neighborhood
     - [ ] separator context menu
         - [x] swap area
-        - [ ] join left/right
+        - [ ] join
     - [ ] workspace tabs
         - [x] basic
         - [ ] templates
