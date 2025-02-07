@@ -9,7 +9,8 @@ import { CONTEXT_MENU_API, type IContextMenuApi } from '@/libraries/menus/servic
 import { Node } from '@/libraries/nodes';
 import useGraph, { NODES_SOCKET_POSITIONS_KEY, type SocketPositions } from '@/components/nodes';
 import SocketRelationComponent from '@/components/nodes/SocketRelationComponent.vue';
-import type { Position } from '@/libraries/workspaces';
+import type { Position, Rectangle } from '@/libraries/workspaces';
+import { intersect2d } from '@/libraries/workspaces/geometry';
 
 const graph = useGraph();
 const n1 = new Node("n1", { x: 0, y: 0 });
@@ -32,8 +33,22 @@ const menu = new Menu([
         node.addInputSocket("yet another", "number");
         node.addOutputSocket("output", "number");
         graph.addNode(node);
+        graph.select([node], false);
     }))
 ]);
+
+const nodeMenu = new Menu([
+    new MenuLeaf("Delete", new AdHocCommand(context => {
+        const nodes = <Node[]>context;
+        if (!nodes) {
+            console.error("context isn't node");
+            return;
+        }
+
+        for (const node of nodes)
+            graph.removeNode(node.id);
+    }))
+])
 
 const menuService = inject<IContextMenuApi>(CONTEXT_MENU_API);
 
@@ -44,6 +59,10 @@ function openMenu(e: PointerEvent) {
         x: pointerPosition.x - (pointerPosition.x % 15),
         y: pointerPosition.y - (pointerPosition.y % 15)
     };
+    if (graph.selected.value.size > 0) {
+        menuService?.set(nodeMenu, [...graph.selected.value.values()]);
+        return;
+    }
     menuService?.set(menu, {});
 }
 
@@ -55,11 +74,15 @@ function setPosition(e: Position) {
     pointerPosition.y = e.y;
 }
 
+function onSelect(rect: Rectangle) {
+    graph.select(graph.nodes().filter(x => intersect2d(x.position, rect)), false);
+}
+
 </script>
 
 <template>
     <div style="height: 100%;" v-on:pointerdown="openMenu">
-        <GlobalSpaceComponent @pointer-position="setPosition">
+        <GlobalSpaceComponent @pointer-position="setPosition" :initial="{ x: 100, y: 100 }" @select="onSelect">
             <SocketRelationComponent v-for="relation in graph.relations()" :relation="relation" :key="relation.id" />
             <NodeComponent v-for="node in graph.nodes()" :node="node" :graph="graph" :key="node.id">
                 <p style="margin: 1rem;">Dynamic Content Here</p>

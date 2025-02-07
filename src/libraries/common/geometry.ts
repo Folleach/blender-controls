@@ -34,3 +34,12 @@ export function domToRect(box: DOMRect | undefined): Rectangle | undefined {
 		height: box.height,
 	};
 }
+
+export function toLocal(spaceElement: HTMLElement | null, clientX: number, clientY: number, origin: Position) {
+	const rect = spaceElement?.getBoundingClientRect() ?? { left: 0, top: 0 };
+
+	return {
+		x: clientX - rect.left - origin.x,
+		y: clientY - rect.top - origin.y,
+	};
+}

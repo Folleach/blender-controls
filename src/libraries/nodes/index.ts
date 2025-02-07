@@ -73,7 +73,7 @@ export class Graph {
 		return true;
 	}
 
-	removeNode(nodeId: NodeId): void {
+	removeNode(nodeId: NodeId): Node | undefined {
 		const node = this.nodes.find((n) => n.id === nodeId);
 		if (!node) return;
 
@@ -87,6 +87,7 @@ export class Graph {
 
 		this.nodesById.delete(node.id);
 		this.nodes = this.nodes.filter((n) => n !== node);
+		return node;
 	}
 
 	getNode(id: NodeId): Node | undefined {

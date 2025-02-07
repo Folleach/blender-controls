@@ -21,6 +21,7 @@ function handleMove(e: PointerEvent) {
     if (e.button !== 0)
         return;
     move.perform(e, node.position);
+    e.stopPropagation();
 }
 
 const style = computed(() => {
@@ -68,10 +69,23 @@ onUnmounted(() => {
     props.node.outputs.forEach(removeGlobalPosition);
 })
 
+function onPointerDown(e: PointerEvent) {
+    if (e.button !== 0) {
+        return false;
+    }
+    if (e.shiftKey) {
+        props.graph.select([props.node], true);
+        return false;
+    }
+    props.graph.select([props.node], false);
+    e.stopPropagation();
+}
+
 </script>
 
 <template>
-    <div class="node" :style="style" ref="element">
+    <div class="node" :class="{ selected: graph.selected.value.has(node) }" @pointerdown="onPointerDown" :style="style"
+        ref="element">
         <div class="title" v-on:pointerdown="handleMove">
             <p>Title</p>
         </div>
@@ -99,6 +113,13 @@ onUnmounted(() => {
     width: max-content;
     background-color: var(--cl-ui);
     color: var(--cl-tx);
+}
+
+.selected {
+    border-color: var(--cl-tx);
+    border-style: solid;
+    border-width: 2px;
+    margin: -2px;
 }
 
 .title {
