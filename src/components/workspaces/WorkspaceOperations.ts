@@ -14,6 +14,7 @@ import {
 } from "@/libraries/workspaces";
 import type { IOverlayProps } from "./WorkspaceAreaProps";
 import { closestSide } from "@/libraries/common/geometry";
+import { v4 } from "uuid";
 
 const start = { x: 0, y: 0 };
 const last = { x: 0, y: 0 };
@@ -161,7 +162,7 @@ export function finishSplit(workspace: Workspace, right: boolean, bottom: boolea
 	}
 
 	workspace.split(area, {
-		appendArea: new LeafArea<string>(INIT_AREA_ID, "none"),
+		appendArea: new LeafArea<string>(v4(), INIT_AREA_ID, "none"),
 		firstSize: new AreaSize(firstSize, "fr"),
 		secondSize: new AreaSize(secondSize, "fr"),
 		orientation: orientation,

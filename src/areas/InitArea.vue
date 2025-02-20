@@ -11,7 +11,7 @@ const service = inject<InitAreaService>(INIT_WINDOW_SERVICE_KEY)
 const workspace = inject(WORKSPACE_API);
 
 function open(id: string) {
-    workspace?.swap(id);
+    workspace?.swapTo(id);
 }
 
 </script>

@@ -1,9 +1,12 @@
+import { v4 } from "uuid";
 import type { None } from "../common/none";
 import type { IContext } from "../contexts";
 import { LastPipe, type IPipe } from "./bus";
 import { intersect2d } from "./geometry";
 
 export const INIT_AREA_ID = "blen.init-window";
+
+export type AreaId = string;
 
 export enum Orientation {
 	Horizontal = 0,
@@ -97,14 +100,16 @@ export class ContainerArea implements IArea {
 }
 
 export class LeafArea<T> implements IArea {
+	id: AreaId;
 	type: string = "leaf";
 	update: IPipe<None, AreaUpdateType> = new LastPipe();
 	private _windowId: string;
 	private _context: T;
 
-	constructor(windowId: string, context: T) {
+	constructor(id: AreaId, windowId: string, context: T) {
 		this._windowId = windowId;
 		this._context = context;
+		this.id = id;
 	}
 
 	public get windowId(): string {
@@ -135,7 +140,7 @@ export class Workspace {
 	}
 
 	static buildDefault(): Workspace {
-		return new Workspace(new LeafArea<unknown>(INIT_AREA_ID, undefined));
+		return new Workspace(new LeafArea<unknown>(v4(), INIT_AREA_ID, undefined));
 	}
 
 	findSiblingContainer(area: IArea | undefined, side?: Side): ContainerArea | undefined {

@@ -9,7 +9,7 @@ const code = atob("PHNjcmlwdCBzZXR1cCBsYW5nPSJ0cyI+CmltcG9ydCB7IFdPUktTUEFDRV9BU
 const workspace = inject(WORKSPACE_API);
 
 function open() {
-    workspace?.swap("blen.demo.workspaces.swap.n1");
+    workspace?.swapTo("blen.demo.workspaces.swap.n1");
 }
 
 </script>

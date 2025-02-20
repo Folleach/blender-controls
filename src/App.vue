@@ -11,6 +11,7 @@ import DebugComponent from "./areas/DebugArea.vue";
 import InitWindowComponent from "./areas/InitArea.vue";
 import NodesArea from "./areas/NodesArea.vue";
 import MultipleWorkspaceComponent from "./components/workspaces/MultipleWorkspaceComponent.vue";
+import { v4 } from "uuid";
 
 const broadcast = new BroadcastChannel("channel");
 broadcast.addEventListener("message", (a: MessageEvent<{ message: string }>) => {
@@ -23,10 +24,10 @@ broadcast.postMessage({
 
 const menuService = new MenuService();
 
-const a1 = new LeafArea<string>("some", "hello");
-const a2 = new LeafArea<string>("some", "world");
-const a3 = new LeafArea<string>("some", "right");
-const a4 = new LeafArea<string>("some", "additional");
+const a1 = new LeafArea<string>(v4(), "some", "hello");
+const a2 = new LeafArea<string>(v4(), "some", "world");
+const a3 = new LeafArea<string>(v4(), "some", "right");
+const a4 = new LeafArea<string>(v4(), "some", "additional");
 const c1 = new ContainerArea(Orientation.Vertical, a1, a2, new AreaSize(1, "fr"), new AreaSize(2, "fr"));
 const c2 = new ContainerArea(Orientation.Horizontal, a3, a4, new AreaSize(1, "fr"), new AreaSize(2, "fr"));
 const root = new ContainerArea(Orientation.Horizontal, c1, c2, new AreaSize(1, "fr"), new AreaSize(2, "fr"));

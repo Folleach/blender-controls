@@ -21,6 +21,8 @@ import MultipleWorkspaceComponent from "@/components/workspaces/MultipleWorkspac
 import DemoContextCodeArea from "./areas/common/DemoContextCodeArea.vue";
 import DemoPlaceholderArea from "./areas/common/DemoPlaceholderArea.vue";
 import type { IPlaceholderContext } from "./areas/common";
+import DemoSplitApiArea from "./areas/workpaces/DemoSplitApiArea.vue";
+import { v4 } from "uuid";
 
 const menuService = new MenuService();
 const initWindowService = new InitAreaService();
@@ -34,26 +36,29 @@ initWindowService.registerArea(DEMO_AREA_WORKSPACE_EXAMPLE, { name: "[Demo] Work
 initWindowService.registerArea(DEMO_AREA_WORKSPACE_CODE, { name: "[Demo] Workspace Example Code" }, () => DemoWorkspaceCode);
 initWindowService.registerArea(DEMO_AREA_CODE, { name: "[Demo] Code Context" }, () => DemoContextCodeArea);
 initWindowService.registerArea(DEMO_AREA_PLACEHOLDER, { name: "[Demo] Placeholder" }, () => DemoPlaceholderArea);
+initWindowService.registerArea("blen.demo.workspace.splitapi", { name: "Split Api Example" }, () => DemoSplitApiArea);
 
 // welcome
-const welcomeRoot = new LeafArea("blen.demo.welcome", undefined);
+const welcomeRoot = new LeafArea(v4(), "blen.demo.welcome", undefined);
 const welcomeWorkspace = new Workspace(welcomeRoot);
 
 // workspace
-const demoAreaWorkspaceExample = new LeafArea(DEMO_AREA_WORKSPACE_EXAMPLE, undefined);
-const demoAreaWorkspaceCode = new LeafArea(DEMO_AREA_WORKSPACE_CODE, undefined);
+const demoAreaWorkspaceExample = new LeafArea(v4(), DEMO_AREA_WORKSPACE_EXAMPLE, undefined);
+const demoAreaWorkspaceCode = new LeafArea(v4(), DEMO_AREA_WORKSPACE_CODE, undefined);
 const demoAreasWorkspaceContainer = new ContainerArea(Orientation.Horizontal, demoAreaWorkspaceCode, demoAreaWorkspaceExample, new AreaSize(2, "fr"), new AreaSize(3, "fr"));
 
-const demoAreaSwapCode = new LeafArea("blen.demo.workspaces.swap", undefined);
+const demoAreaSwapCode = new LeafArea(v4(), "blen.demo.workspaces.swap", undefined);
+const demoSplitApiArea = new LeafArea(v4(), "blen.demo.workspace.splitapi", undefined);
 
-const empty = new LeafArea<IPlaceholderContext>(DEMO_AREA_PLACEHOLDER, { title: "Nothing to show here yet." });
-const demoAreaSwapCodeWithEmpty = new ContainerArea(Orientation.Horizontal, demoAreaSwapCode, empty, new AreaSize(1, "fr"), new AreaSize(5, "fr"));
+const empty = new LeafArea<IPlaceholderContext>(v4(), DEMO_AREA_PLACEHOLDER, { title: "Nothing to show here yet." });
+const demoSplitApiAreaWithEmpty = new ContainerArea(Orientation.Horizontal, demoSplitApiArea, empty, new AreaSize(2, "fr"), new AreaSize(3, "fr"));
+const demoAreaSwapCodeWithSplitApi = new ContainerArea(Orientation.Horizontal, demoAreaSwapCode, demoSplitApiAreaWithEmpty, new AreaSize(1, "fr"), new AreaSize(5, "fr"));
 
-const workspaceRoot = new ContainerArea(Orientation.Vertical, demoAreasWorkspaceContainer, demoAreaSwapCodeWithEmpty, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
+const workspaceRoot = new ContainerArea(Orientation.Vertical, demoAreasWorkspaceContainer, demoAreaSwapCodeWithSplitApi, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 const workspaceWorkspace = new Workspace(workspaceRoot);
 
 // nodes
-const nodesRoot = new LeafArea('blen.node-component', () => NodesArea);
+const nodesRoot = new LeafArea(v4(), 'blen.node-component', () => NodesArea);
 const nodesWorkspace = new Workspace(nodesRoot);
 
 const workspaceService = new WorkspaceService(new InMemoryWorkspaceRepository());

@@ -4,9 +4,10 @@ import { AreaSize, ContainerArea, LeafArea, Orientation, Workspace } from '@/lib
 import type { IPlaceholderContext } from '../common';
 import DemoPaddedComponent from '../common/DemoPaddedComponent.vue';
 import { DEMO_AREA_PLACEHOLDER } from '@/demo';
+import { v4 } from 'uuid';
 
-const first = new LeafArea<IPlaceholderContext>(DEMO_AREA_PLACEHOLDER, { title: "This is left side", subtitle: "There's a right side ->" });
-const second = new LeafArea<IPlaceholderContext>(DEMO_AREA_PLACEHOLDER, { title: "Yes, I'm the right side" });
+const first = new LeafArea<IPlaceholderContext>(v4(), DEMO_AREA_PLACEHOLDER, { title: "This is left side", subtitle: "There's a right side ->" });
+const second = new LeafArea<IPlaceholderContext>(v4(), DEMO_AREA_PLACEHOLDER, { title: "Yes, I'm the right side" });
 const container = new ContainerArea(Orientation.Horizontal, first, second, new AreaSize(2, "fr"), new AreaSize(1, "fr"));
 const workspace = new Workspace(container);
 

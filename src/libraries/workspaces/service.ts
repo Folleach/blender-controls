@@ -10,6 +10,7 @@ enum WorkspaceNodeType {
 
 interface IWorkspaceNode {
 	type: WorkspaceNodeType;
+	id: string | null;
 	left: IWorkspaceNode | null;
 	right: IWorkspaceNode | null;
 	orientation: Orientation | null;
@@ -219,6 +220,7 @@ export class WorkspaceService {
 		if (area instanceof LeafArea) {
 			return {
 				type: WorkspaceNodeType.Leaf,
+				id: area.id,
 				context: area.context,
 				windowId: area.windowId,
 				left: null,
@@ -231,6 +233,7 @@ export class WorkspaceService {
 		if (area instanceof ContainerArea) {
 			return {
 				type: WorkspaceNodeType.Container,
+				id: null,
 				context: null,
 				windowId: null,
 				left: this.convertArea(area.left),
@@ -245,7 +248,7 @@ export class WorkspaceService {
 
 	private convertNode(entry: IWorkspaceNode): IArea {
 		if (entry.type === WorkspaceNodeType.Leaf) {
-			return new LeafArea(entry.windowId ?? "default", entry.context);
+			return new LeafArea(entry.id!, entry.windowId ?? "default", entry.context);
 		}
 		if (entry.type === WorkspaceNodeType.Container) {
 			return new ContainerArea(

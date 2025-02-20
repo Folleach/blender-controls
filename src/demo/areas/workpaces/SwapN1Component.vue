@@ -6,7 +6,7 @@ import { inject } from 'vue';
 const workspace = inject(WORKSPACE_API);
 
 function open() {
-    workspace?.swap("blen.demo.workspaces.swap");
+    workspace?.swapTo("blen.demo.workspaces.swap");
 }
 
 </script>

@@ -1,5 +1,6 @@
 import { expect, test } from "@jest/globals";
 import { AreaSize, ContainerArea, INIT_AREA_ID, LeafArea, Orientation, Side, Workspace } from ".";
+import { v4 } from "uuid";
 
 function createCase1() {
 	return new Workspace(
@@ -7,12 +8,12 @@ function createCase1() {
 			Orientation.Horizontal,
 			new ContainerArea(
 				Orientation.Vertical,
-				new LeafArea<string>(INIT_AREA_ID, "hello"),
-				new LeafArea<string>(INIT_AREA_ID, "world"),
+				new LeafArea<string>(v4(), INIT_AREA_ID, "hello"),
+				new LeafArea<string>(v4(), INIT_AREA_ID, "world"),
 				new AreaSize(1, "fr"),
 				new AreaSize(2, "fr"),
 			),
-			new LeafArea<string>(INIT_AREA_ID, "right"),
+			new LeafArea<string>(v4(), INIT_AREA_ID, "right"),
 			new AreaSize(1, "fr"),
 			new AreaSize(2, "fr"),
 		),
@@ -34,10 +35,10 @@ test("right should be leaf", () => {
 });
 
 test("find sibling", () => {
-	const leftFirst = new LeafArea("hello", undefined);
-	const leftSecond = new LeafArea("world", undefined);
+	const leftFirst = new LeafArea(v4(), "hello", undefined);
+	const leftSecond = new LeafArea(v4(), "world", undefined);
 	const left = new ContainerArea(Orientation.Vertical, leftFirst, leftSecond, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
-	const right = new LeafArea("right", undefined);
+	const right = new LeafArea(v4(), "right", undefined);
 	const root = new ContainerArea(Orientation.Horizontal, left, right, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const workspace = new Workspace(root);
 
@@ -52,11 +53,11 @@ test("find sibling", () => {
 });
 
 test("find sibling in many horizontal areas", () => {
-	const a1 = new LeafArea("a1", undefined);
-	const a2 = new LeafArea("a2", undefined);
-	const a3 = new LeafArea("a3", undefined);
-	const a4 = new LeafArea("a4", undefined);
-	const a5 = new LeafArea("a5", undefined);
+	const a1 = new LeafArea(v4(), "a1", undefined);
+	const a2 = new LeafArea(v4(), "a2", undefined);
+	const a3 = new LeafArea(v4(), "a3", undefined);
+	const a4 = new LeafArea(v4(), "a4", undefined);
+	const a5 = new LeafArea(v4(), "a5", undefined);
 
 	const c1 = new ContainerArea(Orientation.Horizontal, a1, a2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const c2 = new ContainerArea(Orientation.Horizontal, c1, a3, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
@@ -78,10 +79,10 @@ test("find sibling in many horizontal areas", () => {
 });
 
 test("find sibling: discord example", () => {
-	const a1 = new LeafArea("hello", undefined);
-	const a2 = new LeafArea("world", undefined);
-	const a3 = new LeafArea("right", undefined);
-	const a4 = new LeafArea("additional", undefined);
+	const a1 = new LeafArea(v4(), "hello", undefined);
+	const a2 = new LeafArea(v4(), "world", undefined);
+	const a3 = new LeafArea(v4(), "right", undefined);
+	const a4 = new LeafArea(v4(), "additional", undefined);
 	const c1 = new ContainerArea(Orientation.Vertical, a1, a2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const c2 = new ContainerArea(Orientation.Horizontal, a3, a4, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const root = new ContainerArea(Orientation.Horizontal, c1, c2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
@@ -96,10 +97,10 @@ test("find sibling: discord example", () => {
 });
 
 test("find nearest leaf", () => {
-	const a1 = new LeafArea("hello", undefined);
-	const a2 = new LeafArea("world", undefined);
-	const a3 = new LeafArea("right", undefined);
-	const a4 = new LeafArea("additional", undefined);
+	const a1 = new LeafArea(v4(), "hello", undefined);
+	const a2 = new LeafArea(v4(), "world", undefined);
+	const a3 = new LeafArea(v4(), "right", undefined);
+	const a4 = new LeafArea(v4(), "additional", undefined);
 	const c1 = new ContainerArea(Orientation.Vertical, a1, a2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const c2 = new ContainerArea(Orientation.Horizontal, a3, a4, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const root = new ContainerArea(Orientation.Horizontal, c1, c2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
@@ -114,10 +115,10 @@ test("find nearest leaf", () => {
 });
 
 test("swap tree", () => {
-	const a1 = new LeafArea("hello", undefined);
-	const a2 = new LeafArea("world", undefined);
-	const a3 = new LeafArea("right", undefined);
-	const a4 = new LeafArea("additional", undefined);
+	const a1 = new LeafArea(v4(), "hello", undefined);
+	const a2 = new LeafArea(v4(), "world", undefined);
+	const a3 = new LeafArea(v4(), "right", undefined);
+	const a4 = new LeafArea(v4(), "additional", undefined);
 	const c1 = new ContainerArea(Orientation.Vertical, a1, a2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const c2 = new ContainerArea(Orientation.Horizontal, a3, a4, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const root = new ContainerArea(Orientation.Horizontal, c1, c2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
@@ -130,8 +131,8 @@ test("swap tree", () => {
 });
 
 test("swap tree with one container", () => {
-	const a1 = new LeafArea("hello", undefined);
-	const a2 = new LeafArea("world", undefined);
+	const a1 = new LeafArea(v4(), "hello", undefined);
+	const a2 = new LeafArea(v4(), "world", undefined);
 	const c1 = new ContainerArea(Orientation.Horizontal, a1, a2, AreaSize.one, AreaSize.one);
 	const workspace = new Workspace(c1);
 
@@ -141,10 +142,10 @@ test("swap tree with one container", () => {
 });
 
 test("remove: container", () => {
-	const a1 = new LeafArea("hello", undefined);
-	const a2 = new LeafArea("world", undefined);
-	const a3 = new LeafArea("right", undefined);
-	const a4 = new LeafArea("additional", undefined);
+	const a1 = new LeafArea(v4(), "hello", undefined);
+	const a2 = new LeafArea(v4(), "world", undefined);
+	const a3 = new LeafArea(v4(), "right", undefined);
+	const a4 = new LeafArea(v4(), "additional", undefined);
 	const c1 = new ContainerArea(Orientation.Vertical, a1, a2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const c2 = new ContainerArea(Orientation.Horizontal, a3, a4, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const root = new ContainerArea(Orientation.Horizontal, c1, c2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
@@ -155,10 +156,10 @@ test("remove: container", () => {
 });
 
 test("remove: area", () => {
-	const a1 = new LeafArea("hello", undefined);
-	const a2 = new LeafArea("world", undefined);
-	const a3 = new LeafArea("right", undefined);
-	const a4 = new LeafArea("additional", undefined);
+	const a1 = new LeafArea(v4(), "hello", undefined);
+	const a2 = new LeafArea(v4(), "world", undefined);
+	const a3 = new LeafArea(v4(), "right", undefined);
+	const a4 = new LeafArea(v4(), "additional", undefined);
 	const c1 = new ContainerArea(Orientation.Vertical, a1, a2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const c2 = new ContainerArea(Orientation.Horizontal, a3, a4, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
 	const root = new ContainerArea(Orientation.Horizontal, c1, c2, new AreaSize(1, "fr"), new AreaSize(1, "fr"));
