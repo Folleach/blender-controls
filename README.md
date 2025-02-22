@@ -1,14 +1,14 @@
-I like blender ui and user experience.  
-Therefore, I created this repository, in which implemented some [Blender interface elements](https://docs.blender.org/manual/en/latest/interface/index.html) on [Vue](https://vuejs.org/).
+This component library is inspired by Blender because I like its UI and UX.  
+Therefore, I created this repository, in which implemented some [Blender interface elements](https://docs.blender.org/manual/en/latest/interface/index.html) in [Vue](https://vuejs.org/).
 
 #### Try it
 
-https://folleach.net/blender-controls/storybook/index.html
+https://blender-ui.folleach.net/
 
 or build yourself
 
 ```bash
-npm run storybook
+npm run dev
 ```
 
 #### Roadmap
