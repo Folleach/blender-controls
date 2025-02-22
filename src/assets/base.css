@@ -156,6 +156,8 @@
 	--cl-tx: var(--flexoki-200);
 	--cl-tx2: var(--flexoki-500);
 	--cl-ui: var(--flexoki-900);
+	--cl-ui2: var(--flexoki-850);
+	--cl-ui3: var(--flexoki-800);
 	--cl-bg2: var(--flexoki-950);
 	--cl-bg: var(--flexoki-black);
 
@@ -163,6 +165,9 @@
 	--cl-bl2: var(--flexoki-blue-600);
 	--cl-ma: var(--flexoki-magenta-400);
 	--cl-ma2: var(--flexoki-magenta-600);
+
+	--cl-tx-abs: var(--flexoki-paper);
+	--cl-accent: var(--cl-bl);
 }
 
 /* light */
@@ -170,6 +175,8 @@
 	--cl-tx: var(--flexoki-black);
 	--cl-tx2: var(--flexoki-600);
 	--cl-ui: var(--flexoki-100);
+	--cl-ui2: var(--flexoki-150);
+	--cl-ui3: var(--flexoki-300);
 	--cl-bg2: var(--flexoki-50);
 	--cl-bg: var(--flexoki-paper);
 
@@ -177,6 +184,9 @@
 	--cl-bl2: var(--flexoki-blue-400);
 	--cl-ma: var(--flexoki-magenta-600);
 	--cl-ma2: var(--flexoki-magenta-400);
+
+	--cl-tx-abs: var(--flexoki-black);
+	--cl-accent: var(--cl-bl2);
 } */
 
 /* semantic color variables for this project */

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BlenButton from '@/components/buttons/BlenButton.vue';
 import { WORKSPACE_API } from '@/components/workspaces';
 import CenteredComponent from '@/demo/common/CenteredComponent.vue';
 import { inject } from 'vue';
@@ -16,6 +17,6 @@ function open() {
         <h1>That's how Swap works! ^_^</h1>
         <p> There is nothing left of the previous area.</p>
         <p>But! You can bring her back!</p>
-        <button style="margin-top: 1rem;" @click="open">Swap back ʕノ•ᴥ•ʔノ ︵ ┻━┻</button>
+        <BlenButton style="margin-top: 1rem;" @click="open">Swap back ʕノ•ᴥ•ʔノ ︵ ┻━┻</BlenButton>
     </CenteredComponent>
 </template>

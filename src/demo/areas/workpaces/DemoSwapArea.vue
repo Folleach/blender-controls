@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BlenButton from '@/components/buttons/BlenButton.vue';
 import { WORKSPACE_API } from '@/components/workspaces';
 import CenteredComponent from '@/demo/common/CenteredComponent.vue';
 import CodeComponent from '@/demo/common/CodeComponent.vue';
@@ -20,6 +21,6 @@ function open() {
         <CodeComponent>
             <pre>{{ code }}</pre>
         </CodeComponent>
-        <button @click="open">Swap me</button>
+        <BlenButton @click="open">Swap me</BlenButton>
     </CenteredComponent>
 </template>

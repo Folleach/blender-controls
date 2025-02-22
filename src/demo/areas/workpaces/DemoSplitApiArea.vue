@@ -7,6 +7,9 @@ import { DEMO_AREA_PLACEHOLDER } from '@/demo';
 import type { ISplitApiExampleContext } from '.';
 import { v4 } from 'uuid';
 import ListSeparator from '@/components/common/ListSeparator.vue';
+import BlenButton from '@/components/buttons/BlenButton.vue';
+import BlenItemsGroup from '@/components/common/BlenItemsGroup.vue';
+import BlenRawButton from '@/components/buttons/BlenRawButton.vue';
 
 const workspace = inject(WORKSPACE_API);
 
@@ -38,9 +41,14 @@ function close(id: string) {
         <h1>Split</h1>
         <p>With this feature you can create areas opening for a while</p>
         <div style="height: 1rem;"></div>
-        <button @click="split(Orientation.Horizontal)">Split Horizontal</button>
-        <button @click="split(Orientation.Vertical)">Split Vertical</button>
+        <BlenItemsGroup :orientation="Orientation.Horizontal">
+            <BlenRawButton @click="split(Orientation.Horizontal)">Split Horizontal</BlenRawButton>
+            <BlenRawButton @click="split(Orientation.Vertical)">Split Vertical</BlenRawButton>
+        </BlenItemsGroup>
         <ListSeparator />
-        <button v-for="item in holders" @click="close(item)" :key="item">Close ({{ item }})</button>
+        <BlenItemsGroup :orientation="Orientation.Vertical">
+            <BlenRawButton v-for="item in holders" @click="close(item)" :key="item">Close ({{ item.substring(0, 8) }})
+            </BlenRawButton>
+        </BlenItemsGroup>
     </CenteredComponent>
 </template>

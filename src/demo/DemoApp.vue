@@ -23,6 +23,7 @@ import DemoPlaceholderArea from "./areas/common/DemoPlaceholderArea.vue";
 import type { IPlaceholderContext } from "./areas/common";
 import DemoSplitApiArea from "./areas/workpaces/DemoSplitApiArea.vue";
 import { v4 } from "uuid";
+import DemoElementsArea from "./areas/elements/DemoElementsArea.vue";
 
 const menuService = new MenuService();
 const initWindowService = new InitAreaService();
@@ -37,6 +38,7 @@ initWindowService.registerArea(DEMO_AREA_WORKSPACE_CODE, { name: "[Demo] Workspa
 initWindowService.registerArea(DEMO_AREA_CODE, { name: "[Demo] Code Context" }, () => DemoContextCodeArea);
 initWindowService.registerArea(DEMO_AREA_PLACEHOLDER, { name: "[Demo] Placeholder" }, () => DemoPlaceholderArea);
 initWindowService.registerArea("blen.demo.workspace.splitapi", { name: "Split Api Example" }, () => DemoSplitApiArea);
+initWindowService.registerArea("blen.demo.elements", { name: "UI Elements" }, () => DemoElementsArea);
 
 // welcome
 const welcomeRoot = new LeafArea(v4(), "blen.demo.welcome", undefined);
@@ -61,12 +63,17 @@ const workspaceWorkspace = new Workspace(workspaceRoot);
 const nodesRoot = new LeafArea(v4(), 'blen.node-component', () => NodesArea);
 const nodesWorkspace = new Workspace(nodesRoot);
 
+// elements
+const elementsRoot = new LeafArea(v4(), "blen.demo.elements", undefined);
+const elementsWorkspace = new Workspace(elementsRoot);
+
 const workspaceService = new WorkspaceService(new InMemoryWorkspaceRepository());
 workspaceService.restore().then(async successfully => {
     if (!successfully) {
         const welcome = await workspaceService.add("Welcome", welcomeWorkspace);
         await workspaceService.add("Workspaces", workspaceWorkspace);
-        await workspaceService.add("Nodes", nodesWorkspace)
+        await workspaceService.add("Nodes", nodesWorkspace);
+        await workspaceService.add("UI Elements", elementsWorkspace);
         workspaceService.change(welcome);
     }
 });
