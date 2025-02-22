@@ -7,7 +7,6 @@ import { DEMO_AREA_PLACEHOLDER } from '@/demo';
 import type { ISplitApiExampleContext } from '.';
 import { v4 } from 'uuid';
 import ListSeparator from '@/components/common/ListSeparator.vue';
-import BlenButton from '@/components/buttons/BlenButton.vue';
 import BlenItemsGroup from '@/components/common/BlenItemsGroup.vue';
 import BlenRawButton from '@/components/buttons/BlenRawButton.vue';
 

@@ -60,7 +60,7 @@ getContributors();
     </div>
 </template>
 
-<style scoped>
+<style lang="css" scoped>
 .root {
     text-align: center;
     font-size: 2em;

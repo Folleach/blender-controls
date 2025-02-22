@@ -68,10 +68,16 @@ npm run storybook
     - [ ] groups
     - [ ] frames
     - [ ] api
-- [ ] routine buttons, etc...
+- [ ] routine
     - [x] tab list
         - [ ] rename on selected click
-    - [ ] button
+    - [x] button
+    - [x] number field
+        - [ ] change to text field when click
+        - [ ] fix double click when drag from arrow
+        - [ ] change style when dragging
+    - [ ] radio button
+    - [ ] text field
 - [ ] custom themes
 
 This project is **under development**.  
