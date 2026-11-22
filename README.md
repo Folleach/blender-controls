@@ -3,7 +3,7 @@ Therefore, I created this repository, in which implemented some [Blender interfa
 
 Using the native API of browsers.
 
-The initial implementation used Vue (commit bd3fbc6c), but I didn't like working with objects by reference in their states. Proxy objects were so annoying.  
+The initial implementation used Vue (commit [bd3fbc6c](https://github.com/Folleach/blender-controls/tree/bd3fbc6cdc1142eb1495aca3a0bc40a0975db4df)), but I didn't like working with objects by reference in their states. Proxy objects were so annoying.  
 Since then, I've tried the native API and liked it.
 
 #### Try it
@@ -21,7 +21,7 @@ npm run dev
 
 | Package | What it is |
 |---|---|
-| [`@blender-controls/core`](packages/core) | Pure package without DOM dependency. Use it to build the same interface in React, Vue or anything else. |
+| [`@blender-controls/core`](packages/core) | Pure package without DOM dependency.<br>Use it to build the same interface in React, Vue or anything else. |
 | [`@blender-controls/ui`](packages/ui) | Native web components on top of the core. |
 
 #### Roadmap
