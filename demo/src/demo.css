@@ -1,0 +1,108 @@
+@font-face {
+	font-family: 'DejaVu Sans';
+	src: url('/font/DejaVuSans.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	height: 100dvh;
+	overflow: hidden;
+	color: var(--blen-text);
+	background: var(--blen-background);
+	line-height: 1.6;
+	font-family: 'DejaVu Sans', -apple-system, sans-serif;
+	font-size: 0.75rem;
+	-webkit-font-smoothing: antialiased;
+}
+
+#app {
+	height: 100dvh;
+}
+
+h1, h2, h3, p {
+	margin: 0.5rem 0;
+	font-weight: normal;
+}
+
+a { color: var(--flexoki-blue-400); }
+a:hover { color: var(--flexoki-blue-600); }
+a:visited { color: var(--flexoki-magenta-400); }
+
+pre {
+	width: fit-content;
+	tab-size: 4;
+	max-width: 100%;
+	overflow: auto;
+	padding: 0.5rem 0.75rem;
+	border-radius: 0.25rem;
+	background: var(--blen-background);
+	text-align: left;
+}
+
+.centered {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 100%;
+	padding: 1rem;
+	text-align: center;
+}
+
+.padded {
+	height: 100%;
+	padding: 1rem;
+}
+
+.row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+	justify-content: center;
+	margin: 0.5rem 0;
+}
+
+.muted {
+	color: var(--blen-text-muted);
+}
+
+.live-tab {
+	margin: 0.5rem 0;
+	padding: 0.5rem 0.75rem;
+	border-radius: 0.25rem;
+	background: var(--blen-surface);
+}
+
+.live-tab header {
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+.live-tab ul {
+	margin: 0.25rem 0 0;
+	padding-left: 1.25rem;
+}
+
+.badge {
+	margin-left: 0.5rem;
+	padding: 0 0.4rem;
+	border-radius: 0.25rem;
+	color: var(--blen-text-muted);
+	background: var(--blen-control);
+}
+
+.badge.active {
+	color: var(--blen-text-strong);
+	background: var(--blen-accent);
+}

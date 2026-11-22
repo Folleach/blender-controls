@@ -1,0 +1,14 @@
+{
+	"name": "@blender-controls/demo",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@blender-controls/core": "*",
+		"@blender-controls/ui": "*"
+	}
+}

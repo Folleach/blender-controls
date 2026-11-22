@@ -1,0 +1,29 @@
+{
+	"name": "@blender-controls/core",
+	"version": "0.1.0",
+	"description": "Framework-agnostic logic for Blender-like interfaces: tiling workspaces, area lifecycle, context menus, node graphs",
+	"license": "Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Folleach/blender-controls.git",
+		"directory": "packages/core"
+	},
+	"type": "module",
+	"sideEffects": false,
+	"files": [
+		"dist",
+		"src"
+	],
+	"exports": {
+		".": {
+			"source": "./src/index.ts",
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run"
+	}
+}

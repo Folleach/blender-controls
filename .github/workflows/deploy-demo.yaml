@@ -23,17 +23,18 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
         cache-dependency-path: './package-lock.json'
-    - name: Build static files
+    - name: Test and build
       run: |
         npm ci
-        CI=false
+        npm run typecheck
+        npm test
         npm run build
     - uses: ./s3-upload
       with:
         aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
         aws_bucket: blender-controls
-        source_dir: ./dist
+        source_dir: ./demo/dist
         destination_dir: ./demo
         endpoint: https://s3.folleach.net/
         force_path_style: true

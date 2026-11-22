@@ -1,15 +1,28 @@
 This component library is inspired by Blender because I like its UI and UX.  
-Therefore, I created this repository, in which implemented some [Blender interface elements](https://docs.blender.org/manual/en/latest/interface/index.html) in [Vue](https://vuejs.org/).
+Therefore, I created this repository, in which implemented some [Blender interface elements](https://docs.blender.org/manual/en/latest/interface/index.html) for web.
+
+Using the native API of browsers.
+
+The initial implementation used Vue (commit bd3fbc6c), but I didn't like working with objects by reference in their states. Proxy objects were so annoying.  
+Since then, I've tried the native API and liked it.
 
 #### Try it
 
 https://blender-ui.folleach.net/
 
-or build yourself
+or run it yourself
 
 ```bash
+npm install
 npm run dev
 ```
+
+#### Packages
+
+| Package | What it is |
+|---|---|
+| [`@blender-controls/core`](packages/core) | Pure package without DOM dependency. Use it to build the same interface in React, Vue or anything else. |
+| [`@blender-controls/ui`](packages/ui) | Native web components on top of the core. |
 
 #### Roadmap
 
@@ -29,8 +42,8 @@ npm run dev
     - [ ] workspace tabs
         - [x] basic
         - [ ] templates
-        - [ ] duplicate
-        - [ ] reorder
+        - [x] duplicate
+        - [x] reorder
         - [x] remove
     - [ ] api for inner areas
         - [x] swap
@@ -80,5 +93,4 @@ npm run dev
     - [ ] text field
 - [ ] custom themes
 
-This project is **under development**.  
-Unsuitable for production
+This project is **under development**.
