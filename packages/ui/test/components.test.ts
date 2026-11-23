@@ -365,4 +365,22 @@ describe('<blen-node-editor>', () => {
 		const box = editor.shadowRoot!.querySelector('.space')!.getBoundingClientRect();
 		expect(editor.toGraph({ x: box.left + 130, y: box.top + 60 })).toEqual({ x: 30, y: 10 });
 	});
+
+	it('zooms around the given client position', () => {
+		const editor = new NodeEditorElement();
+		document.body.append(editor);
+		editor.offset = { x: 100, y: 50 };
+
+		const box = editor.shadowRoot!.querySelector('.space')!.getBoundingClientRect();
+		const client = { x: box.left + 140, y: box.top + 70 };
+		const before = editor.toGraph(client);
+		editor.zoomAt(2, client);
+
+		expect(editor.zoom).toBe(2);
+		expect(editor.toGraph(client)).toEqual(before);
+		expect(editor.toGraph({ x: box.left + 100, y: box.top + 50 })).toEqual({ x: 20, y: 10 });
+
+		editor.zoom = 100;
+		expect(editor.zoom).toBe(8);
+	});
 });

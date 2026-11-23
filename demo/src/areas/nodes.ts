@@ -53,7 +53,10 @@ export const nodesArea = (contextMenu: ContextMenu) =>
 					new MenuItem(editor.curving === 0 ? 'Curved Links' : 'Straight Links', () => {
 						editor.curving = editor.curving === 0 ? 1 : 0;
 					}),
-					new MenuItem('Reset View', () => (editor.offset = { x: 100, y: 100 })),
+					new MenuItem('Reset View', () => {
+						editor.zoom = 1;
+						editor.offset = { x: 100, y: 100 };
+					}),
 				]);
 				openContextMenu(contextMenu, menu, event_);
 			});

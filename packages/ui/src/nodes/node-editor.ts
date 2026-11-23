@@ -6,6 +6,9 @@ import { vars } from '../vars.ts';
 
 const SVG = 'http://www.w3.org/2000/svg';
 const CLIP_GAP = 100;
+const MIN_ZOOM = 0.01;
+const MAX_ZOOM = 8;
+const ZOOM_SPEED = 0.0015;
 
 const styles = css`
 :host {
@@ -17,6 +20,7 @@ const styles = css`
 	font-family: ${vars.font};
 	--x: 0px;
 	--y: 0px;
+	--zoom: 1;
 	--grid-color: color-mix(in srgb, ${vars.panel} 92%, ${vars.textMuted} 8%);
 }
 
@@ -28,7 +32,7 @@ const styles = css`
 	background-image:
 		linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
 		linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
-	background-size: 60px 60px;
+	background-size: calc(60px * var(--zoom)) calc(60px * var(--zoom));
 	background-position: var(--x) var(--y);
 	touch-action: none;
 }
@@ -37,7 +41,8 @@ const styles = css`
 	position: absolute;
 	left: 0;
 	top: 0;
-	transform: translate(var(--x), var(--y));
+	transform-origin: 0 0;
+	transform: translate(var(--x), var(--y)) scale(var(--zoom));
 	will-change: transform;
 }
 
@@ -165,6 +170,7 @@ export class NodeEditorElement extends HTMLElement {
 	private readonly roots: WeakMap<Element, GraphNode> = new WeakMap();
 	private slotCounter = 0;
 	private _offset: Position = { x: 0, y: 0 };
+	private _zoom = 1;
 	private _pointer: Position = { x: 0, y: 0 };
 	private _curving = 1;
 	private viewport: Size = { width: 0, height: 0 };
@@ -201,6 +207,7 @@ export class NodeEditorElement extends HTMLElement {
 		this.space.addEventListener('pointermove', event => {
 			this._pointer = this.toGraph({ x: event.clientX, y: event.clientY });
 		});
+		this.space.addEventListener('wheel', event => this.spaceWheel(event), { passive: false });
 	}
 
 	get selection(): Selection<GraphNode> {
@@ -216,6 +223,26 @@ export class NodeEditorElement extends HTMLElement {
 		this.style.setProperty('--x', `${offset.x}px`);
 		this.style.setProperty('--y', `${offset.y}px`);
 		this.scheduleClipping();
+	}
+
+	get zoom(): number {
+		return this._zoom;
+	}
+
+	set zoom(zoom: number) {
+		this._zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));
+		this.style.setProperty('--zoom', `${this._zoom}`);
+		this.scheduleClipping();
+	}
+
+	zoomAt(zoom: number, client: Position): void {
+		const anchor = this.toGraph(client);
+		this.zoom = zoom;
+		const box = this.space.getBoundingClientRect();
+		this.offset = {
+			x: client.x - box.left - anchor.x * this._zoom,
+			y: client.y - box.top - anchor.y * this._zoom,
+		};
 	}
 
 	get curving(): number {
@@ -239,7 +266,10 @@ export class NodeEditorElement extends HTMLElement {
 
 	toGraph(client: Position): Position {
 		const box = this.space.getBoundingClientRect();
-		return { x: client.x - box.left - this._offset.x, y: client.y - box.top - this._offset.y };
+		return {
+			x: (client.x - box.left - this._offset.x) / this._zoom,
+			y: (client.y - box.top - this._offset.y) / this._zoom,
+		};
 	}
 
 	bind(graph: Graph, options: NodeEditorOptions = {}): void {
@@ -382,8 +412,8 @@ export class NodeEditorElement extends HTMLElement {
 				continue;
 			const box = handle.getBoundingClientRect();
 			this.offsets.set(socket, {
-				x: box.left + box.width / 2 - origin.left,
-				y: box.top + box.height / 2 - origin.top,
+				x: (box.left + box.width / 2 - origin.left) / this._zoom,
+				y: (box.top + box.height / 2 - origin.top) / this._zoom,
 			});
 		}
 		return true;
@@ -443,10 +473,10 @@ export class NodeEditorElement extends HTMLElement {
 	private clipping() {
 		const all = this.viewport.width === 0 || this.viewport.height === 0;
 		const view: Rectangle = {
-			x: -this._offset.x - CLIP_GAP,
-			y: -this._offset.y - CLIP_GAP,
-			width: this.viewport.width + CLIP_GAP * 2,
-			height: this.viewport.height + CLIP_GAP * 2,
+			x: -this._offset.x / this._zoom - CLIP_GAP,
+			y: -this._offset.y / this._zoom - CLIP_GAP,
+			width: this.viewport.width / this._zoom + CLIP_GAP * 2,
+			height: this.viewport.height / this._zoom + CLIP_GAP * 2,
 		};
 
 		const nodes = attachVisible(this.nodesLayer, this.views, (node, { root, content }) => {
@@ -474,6 +504,12 @@ export class NodeEditorElement extends HTMLElement {
 			view.root.classList.toggle('selected', this._selection.has(node));
 	}
 
+	private spaceWheel(event: WheelEvent) {
+		event.preventDefault();
+		const scale = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? 400 : 1;
+		this.zoomAt(this._zoom * Math.exp(-event.deltaY * scale * ZOOM_SPEED), { x: event.clientX, y: event.clientY });
+	}
+
 	private spacePointerDown(event: PointerEvent) {
 		if (event.button === 1) {
 			event.preventDefault();
@@ -493,10 +529,10 @@ export class NodeEditorElement extends HTMLElement {
 					const box = rectangleFromPoints(start, this.toGraph({ x: e.clientX, y: e.clientY }));
 					this.selectionBox.hidden = false;
 					Object.assign(this.selectionBox.style, {
-						left: `${box.x + this._offset.x}px`,
-						top: `${box.y + this._offset.y}px`,
-						width: `${box.width}px`,
-						height: `${box.height}px`,
+						left: `${box.x * this._zoom + this._offset.x}px`,
+						top: `${box.y * this._zoom + this._offset.y}px`,
+						width: `${box.width * this._zoom}px`,
+						height: `${box.height * this._zoom}px`,
 					});
 				},
 				end: (e, cancelled) => {
@@ -540,7 +576,8 @@ export class NodeEditorElement extends HTMLElement {
 			return;
 		this.nodePointerDown(event, node);
 		const moving = this._selection.has(node) ? this._selection.values() : [node];
-		const pointer = { x: event.clientX, y: event.clientY };
+		const zoom = this._zoom;
+		const pointer = { x: event.clientX / zoom, y: event.clientY / zoom };
 		const alignment = new GridAlignment(this.options.grid ?? 15);
 		const sessions = moving.map(item => ({ item, session: new DragSession(item.position, pointer, alignment) }));
 		holdPointer(
@@ -548,7 +585,7 @@ export class NodeEditorElement extends HTMLElement {
 			{
 				move: e => {
 					for (const { item, session } of sessions)
-						graph.move(item, session.at({ x: e.clientX, y: e.clientY }));
+						graph.move(item, session.at({ x: e.clientX / zoom, y: e.clientY / zoom }));
 				},
 			},
 			{ cursor: 'grabbing' },

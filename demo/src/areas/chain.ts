@@ -63,6 +63,7 @@ export const chainGraphArea = defineDomArea(
 			const visible = editor.visible;
 			const text = [
 				`Position: ${Math.round(-offset.x)}, ${Math.round(-offset.y)}`,
+				`Zoom: ${Math.round(editor.zoom * 100)}%`,
 				`Nodes: ${visible.nodes} / ${graph.nodes().length}`,
 				`Links: ${visible.relations} / ${graph.relations().length}`,
 				`FPS: ${fps}`,
