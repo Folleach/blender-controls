@@ -9,6 +9,9 @@ const CLIP_GAP = 100;
 const MIN_ZOOM = 0.01;
 const MAX_ZOOM = 8;
 const ZOOM_SPEED = 0.0015;
+const PINCH_SPEED = 0.01;
+const WHEEL_GESTURE_GAP = 150;
+const MOUSE_NOTCH_DELTA = 50;
 
 const styles = css`
 :host {
@@ -176,6 +179,8 @@ export class NodeEditorElement extends HTMLElement {
 	private viewport: Size = { width: 0, height: 0 };
 	private clippingRaf = 0;
 	private _visible = { nodes: 0, relations: 0 };
+	private wheelSource: 'mouse' | 'trackpad' = 'mouse';
+	private lastWheel = -Infinity;
 
 	constructor() {
 		super();
@@ -507,7 +512,23 @@ export class NodeEditorElement extends HTMLElement {
 	private spaceWheel(event: WheelEvent) {
 		event.preventDefault();
 		const scale = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? 400 : 1;
-		this.zoomAt(this._zoom * Math.exp(-event.deltaY * scale * ZOOM_SPEED), { x: event.clientX, y: event.clientY });
+		const client = { x: event.clientX, y: event.clientY };
+		// browsers report a trackpad pinch as a wheel event with ctrlKey
+		if (event.ctrlKey) {
+			this.zoomAt(this._zoom * Math.exp(-event.deltaY * scale * PINCH_SPEED), client);
+			return;
+		}
+		if (event.timeStamp - this.lastWheel > WHEEL_GESTURE_GAP)
+			this.wheelSource = isMouseWheel(event) ? 'mouse' : 'trackpad';
+		this.lastWheel = event.timeStamp;
+		if (this.wheelSource === 'mouse') {
+			this.zoomAt(this._zoom * Math.exp(-event.deltaY * scale * ZOOM_SPEED), client);
+			return;
+		}
+		this.offset = {
+			x: this._offset.x - event.deltaX * scale,
+			y: this._offset.y - event.deltaY * scale,
+		};
 	}
 
 	private spacePointerDown(event: PointerEvent) {
@@ -687,4 +708,14 @@ function attachVisible<K, V>(
 		}
 	}
 	return count;
+}
+
+// the browser does not tell a mouse wheel from a trackpad scroll, so guess it from the deltas:
+// a mouse wheel scrolls by lines or by large integer notches, a trackpad by small pixel steps on both axes
+function isMouseWheel(event: WheelEvent): boolean {
+	if (event.deltaMode !== WheelEvent.DOM_DELTA_PIXEL)
+		return true;
+	if (event.deltaX !== 0)
+		return false;
+	return Number.isInteger(event.deltaY) && Math.abs(event.deltaY) >= MOUSE_NOTCH_DELTA;
 }

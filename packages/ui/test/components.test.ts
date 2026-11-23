@@ -383,4 +383,52 @@ describe('<blen-node-editor>', () => {
 		editor.zoom = 100;
 		expect(editor.zoom).toBe(8);
 	});
+
+	describe('wheel', () => {
+		const wheel = (editor: NodeEditorElement, init: WheelEventInit) => {
+			const space = editor.shadowRoot!.querySelector('.space')!;
+			const event = new WheelEvent('wheel', { bubbles: true, cancelable: true, ...init });
+			// happy-dom ignores modifier keys of WheelEventInit
+			Object.defineProperty(event, 'ctrlKey', { value: init.ctrlKey ?? false });
+			space.dispatchEvent(event);
+			return event;
+		};
+
+		const create = () => {
+			const editor = new NodeEditorElement();
+			document.body.append(editor);
+			editor.offset = { x: 100, y: 50 };
+			return editor;
+		};
+
+		it('pans on a two finger trackpad scroll', () => {
+			const editor = create();
+			const event = wheel(editor, { deltaX: 3.5, deltaY: -7.25 });
+
+			expect(event.defaultPrevented).toBe(true);
+			expect(editor.zoom).toBe(1);
+			expect(editor.offset).toEqual({ x: 96.5, y: 57.25 });
+		});
+
+		it('zooms on a trackpad pinch', () => {
+			const editor = create();
+			wheel(editor, { deltaY: -10, ctrlKey: true });
+
+			expect(editor.zoom).toBeGreaterThan(1);
+		});
+
+		it('zooms on a mouse wheel notch', () => {
+			const editor = create();
+			wheel(editor, { deltaY: 100 });
+
+			expect(editor.zoom).toBeLessThan(1);
+		});
+
+		it('zooms on a line based mouse wheel', () => {
+			const editor = create();
+			wheel(editor, { deltaY: -3, deltaMode: WheelEvent.DOM_DELTA_LINE });
+
+			expect(editor.zoom).toBeGreaterThan(1);
+		});
+	});
 });
