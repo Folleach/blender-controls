@@ -1,10 +1,11 @@
 import { DragSession, GridAlignment, Lifetime, Selection, rectangleFromPoints, rectanglesIntersect } from '@blender-controls/core';
-import type { Graph, GraphNode, Position, Relation, Socket } from '@blender-controls/core';
+import type { Graph, GraphNode, Position, Rectangle, Relation, Size, Socket } from '@blender-controls/core';
 import { holdPointer, startMove } from '../pointer.ts';
 import { css, element, html, query, shadow } from '../style.ts';
 import { vars } from '../vars.ts';
 
 const SVG = 'http://www.w3.org/2000/svg';
+const CLIP_GAP = 100;
 
 const styles = css`
 :host {
@@ -159,11 +160,16 @@ export class NodeEditorElement extends HTMLElement {
 	private readonly views: Map<GraphNode, NodeView> = new Map();
 	private readonly paths: Map<Relation, SVGPathElement> = new Map();
 	private readonly offsets: Map<Socket, Position> = new Map();
+	private readonly sizes: Map<GraphNode, Size> = new Map();
 	private readonly sockets: WeakMap<Element, Socket> = new WeakMap();
+	private readonly roots: WeakMap<Element, GraphNode> = new WeakMap();
 	private slotCounter = 0;
 	private _offset: Position = { x: 0, y: 0 };
 	private _pointer: Position = { x: 0, y: 0 };
 	private _curving = 1;
+	private viewport: Size = { width: 0, height: 0 };
+	private clippingRaf = 0;
+	private _visible = { nodes: 0, relations: 0 };
 
 	constructor() {
 		super();
@@ -174,11 +180,21 @@ export class NodeEditorElement extends HTMLElement {
 		this.pending = query<SVGPathElement>(root, '.pending');
 		this.selectionBox = query(root, '.selection');
 		this.observer = new ResizeObserver(entries => {
+			const measured: GraphNode[] = [];
 			for (const entry of entries) {
-				const node = this.nodeOf(entry.target);
-				if (node)
-					this.measureNode(node);
+				if (entry.target === this) {
+					this.viewport = { width: entry.contentRect.width, height: entry.contentRect.height };
+					this.scheduleClipping();
+					continue;
+				}
+				const node = this.roots.get(entry.target);
+				if (node && this.measureNode(node))
+					measured.push(node);
 			}
+			for (const node of measured)
+				this.updateRelationsOf(node);
+			if (measured.length > 0)
+				this.scheduleClipping();
 		});
 
 		this.space.addEventListener('pointerdown', event => this.spacePointerDown(event));
@@ -199,6 +215,7 @@ export class NodeEditorElement extends HTMLElement {
 		this._offset = { ...offset };
 		this.style.setProperty('--x', `${offset.x}px`);
 		this.style.setProperty('--y', `${offset.y}px`);
+		this.scheduleClipping();
 	}
 
 	get curving(): number {
@@ -209,6 +226,11 @@ export class NodeEditorElement extends HTMLElement {
 		this._curving = Math.min(1, Math.max(0, curving));
 		for (const relation of this.paths.keys())
 			this.updateRelation(relation);
+		this.scheduleClipping();
+	}
+
+	get visible(): { nodes: number; relations: number } {
+		return { ...this._visible };
 	}
 
 	get pointer(): Position {
@@ -268,9 +290,12 @@ export class NodeEditorElement extends HTMLElement {
 
 	disconnectedCallback(): void {
 		this.observer.disconnect();
+		cancelAnimationFrame(this.clippingRaf);
+		this.clippingRaf = 0;
 	}
 
 	connectedCallback(): void {
+		this.observer.observe(this);
 		for (const view of this.views.values())
 			this.observer.observe(view.root);
 	}
@@ -300,11 +325,11 @@ export class NodeEditorElement extends HTMLElement {
 		title.addEventListener('pointerdown', event => this.titlePointerDown(event, node));
 
 		this.views.set(node, { root, content });
+		this.roots.set(root, node);
 		this.nodesLayer.append(root);
 		this.placeNode(node);
-		this.renderSelection();
+		root.classList.toggle('selected', this._selection.has(node));
 		this.observer.observe(root);
-		this.measureNode(node);
 	}
 
 	private renderSocket(socket: Socket): HTMLElement {
@@ -331,7 +356,9 @@ export class NodeEditorElement extends HTMLElement {
 		view.content?.remove();
 		for (const socket of [...node.inputs, ...node.outputs])
 			this.offsets.delete(socket);
+		this.sizes.delete(node);
 		this._selection.delete(node);
+		this.scheduleClipping();
 	}
 
 	private placeNode(node: GraphNode) {
@@ -340,12 +367,14 @@ export class NodeEditorElement extends HTMLElement {
 			return;
 		view.root.style.transform = `translate(${node.position.x}px, ${node.position.y}px)`;
 		this.updateRelationsOf(node);
+		this.scheduleClipping();
 	}
 
-	private measureNode(node: GraphNode) {
+	private measureNode(node: GraphNode): boolean {
 		const view = this.views.get(node);
 		if (!view || !view.root.isConnected)
-			return;
+			return false;
+		this.sizes.set(node, { width: view.root.offsetWidth, height: view.root.offsetHeight });
 		const origin = view.root.getBoundingClientRect();
 		for (const handle of view.root.querySelectorAll('.socket')) {
 			const socket = this.sockets.get(handle);
@@ -357,7 +386,7 @@ export class NodeEditorElement extends HTMLElement {
 				y: box.top + box.height / 2 - origin.top,
 			});
 		}
-		this.updateRelationsOf(node);
+		return true;
 	}
 
 	private socketPosition(socket: Socket): Position | undefined {
@@ -374,16 +403,22 @@ export class NodeEditorElement extends HTMLElement {
 		this.paths.set(relation, path);
 		this.links.append(path);
 		this.updateRelation(relation);
+		this.scheduleClipping();
 	}
 
 	private removeRelation(relation: Relation) {
 		this.paths.get(relation)?.remove();
 		this.paths.delete(relation);
+		this.scheduleClipping();
 	}
 
 	private updateRelationsOf(node: GraphNode) {
-		for (const relation of this.paths.keys()) {
-			if (relation.from.node === node || relation.to.node === node)
+		for (const socket of node.inputs) {
+			if (socket.relation)
+				this.updateRelation(socket.relation);
+		}
+		for (const socket of node.outputs) {
+			for (const relation of socket.relations)
 				this.updateRelation(relation);
 		}
 	}
@@ -396,17 +431,47 @@ export class NodeEditorElement extends HTMLElement {
 			path.setAttribute('d', curve(from, to, this._curving));
 	}
 
+	private scheduleClipping() {
+		if (this.clippingRaf || !this.isConnected)
+			return;
+		this.clippingRaf = requestAnimationFrame(() => {
+			this.clippingRaf = 0;
+			this.clipping();
+		});
+	}
+
+	private clipping() {
+		const all = this.viewport.width === 0 || this.viewport.height === 0;
+		const view: Rectangle = {
+			x: -this._offset.x - CLIP_GAP,
+			y: -this._offset.y - CLIP_GAP,
+			width: this.viewport.width + CLIP_GAP * 2,
+			height: this.viewport.height + CLIP_GAP * 2,
+		};
+
+		const nodes = attachVisible(this.nodesLayer, this.views, (node, { root, content }) => {
+			const size = this.sizes.get(node);
+			const visible = all || !size || rectanglesIntersect(view, { ...node.position, ...size });
+			if (content && visible !== content.isConnected) {
+				if (visible)
+					this.append(content);
+				else
+					content.remove();
+			}
+			return visible;
+		}, ({ root }) => root);
+
+		const relations = attachVisible(this.links, this.paths, relation => {
+			const from = this.socketPosition(relation.from);
+			const to = this.socketPosition(relation.to);
+			return all || !from || !to || rectanglesIntersect(view, curveBounds(from, to, this._curving));
+		}, path => path);
+		this._visible = { nodes, relations };
+	}
+
 	private renderSelection() {
 		for (const [node, view] of this.views)
 			view.root.classList.toggle('selected', this._selection.has(node));
-	}
-
-	private nodeOf(target: Element): GraphNode | undefined {
-		for (const [node, view] of this.views) {
-			if (view.root === target)
-				return node;
-		}
-		return undefined;
 	}
 
 	private spacePointerDown(event: PointerEvent) {
@@ -444,13 +509,7 @@ export class NodeEditorElement extends HTMLElement {
 						return;
 					}
 					const box = rectangleFromPoints(start, this.toGraph({ x: e.clientX, y: e.clientY }));
-					const hit = [...this.views].filter(([node, view]) =>
-						rectanglesIntersect(box, {
-							...node.position,
-							width: view.root.offsetWidth,
-							height: view.root.offsetHeight,
-						}),
-					);
+					const hit = [...this.sizes].filter(([node, size]) => rectanglesIntersect(box, { ...node.position, ...size }));
 					this._selection.select(
 						hit.map(([node]) => node),
 						append,
@@ -549,9 +608,46 @@ export class NodeEditorElement extends HTMLElement {
 	}
 }
 
+function curveOffset(from: Position, to: Position, curving: number): number {
+	return Math.max(40, Math.abs(to.x - from.x) / 2) * curving;
+}
+
 function curve(from: Position, to: Position, curving: number): string {
 	if (curving === 0)
 		return `M ${from.x} ${from.y} L ${to.x} ${to.y}`;
-	const dx = Math.max(40, Math.abs(to.x - from.x) / 2) * curving;
+	const dx = curveOffset(from, to, curving);
 	return `M ${from.x} ${from.y} C ${from.x + dx} ${from.y}, ${to.x - dx} ${to.y}, ${to.x} ${to.y}`;
+}
+
+function curveBounds(from: Position, to: Position, curving: number): Rectangle {
+	const dx = curveOffset(from, to, curving);
+	const left = Math.min(from.x, to.x - dx);
+	const right = Math.max(from.x + dx, to.x);
+	const top = Math.min(from.y, to.y);
+	return { x: left, y: top, width: right - left, height: Math.max(from.y, to.y) - top };
+}
+
+function attachVisible<K, V>(
+	parent: Element,
+	items: Map<K, V>,
+	visible: (key: K, value: V) => boolean,
+	elementOf: (value: V) => Element,
+): number {
+	let cursor = parent.firstChild;
+	let count = 0;
+	for (const [key, value] of items) {
+		const element = elementOf(value);
+		if (visible(key, value)) {
+			if (element === cursor)
+				cursor = element.nextSibling;
+			else
+				parent.insertBefore(element, cursor);
+			count++;
+		} else if (element.parentNode === parent) {
+			if (element === cursor)
+				cursor = element.nextSibling;
+			element.remove();
+		}
+	}
+	return count;
 }

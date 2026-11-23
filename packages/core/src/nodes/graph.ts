@@ -99,8 +99,12 @@ export class Graph {
 	remove(node: GraphNode): boolean {
 		if (!this._nodes.has(node))
 			return false;
-		for (const relation of this.relations()) {
-			if (relation.from.node === node || relation.to.node === node)
+		for (const socket of node.inputs) {
+			if (socket.relation)
+				this.unlink(socket.relation);
+		}
+		for (const socket of node.outputs) {
+			for (const relation of [...socket.relations])
 				this.unlink(relation);
 		}
 		this._nodes.delete(node);

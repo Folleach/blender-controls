@@ -10,6 +10,7 @@ import {
 	flexokiPalette,
 } from '@blender-controls/ui';
 import type { DomAreaInstance } from '@blender-controls/ui';
+import { chainGraphArea, chainParamsArea, chainTree } from './areas/chain.ts';
 import { codeArea, placeholderArea } from './areas/common.ts';
 import { elementsArea } from './areas/elements.ts';
 import { LIVE_TABS, liveTabsArea } from './areas/live-tabs.ts';
@@ -45,6 +46,8 @@ const registry = new AreaRegistry<DomAreaInstance>()
 	.register(areaPickerArea())
 	.register(welcomeArea(reset))
 	.register(nodesArea(contextMenu))
+	.register(chainGraphArea)
+	.register(chainParamsArea)
 	.register(elementsArea)
 	.register(placeholderArea)
 	.register(codeArea)
@@ -59,6 +62,7 @@ if (!(await collection.restore())) {
 	collection.add('Welcome', leafTree('blen.demo.welcome'));
 	collection.add('Workspaces', workspacesTree());
 	collection.add('Nodes', leafTree('blen.demo.nodes'));
+	collection.add('Chain', chainTree());
 	collection.add('UI Elements', leafTree('blen.demo.elements'));
 	collection.add('Live Tabs', leafTree(LIVE_TABS));
 }

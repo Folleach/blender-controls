@@ -106,3 +106,19 @@ pre {
 	color: var(--blen-text-strong);
 	background: var(--blen-accent);
 }
+
+.graph-host {
+	position: relative;
+	height: 100%;
+}
+
+.graph-stats {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.75rem;
+	white-space: pre;
+	text-align: right;
+	font-family: 'DejaVu Sans Mono', monospace;
+	color: var(--blen-text-muted);
+	pointer-events: none;
+}
