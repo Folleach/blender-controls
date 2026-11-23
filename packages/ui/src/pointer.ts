@@ -91,9 +91,11 @@ export function lockedDrag(
 	target: HTMLElement,
 	handlers: { move(delta: Position): void; end?(): void },
 ): Disposable {
+	const root = target.getRootNode() as Document | ShadowRoot;
 	const request = target.requestPointerLock?.() as Promise<void> | void;
-	if (request && typeof request.catch === 'function')
-		request.catch(() => {});
+	const locked = request && typeof request.then === 'function'
+		? request.catch(() => {})
+		: Promise.resolve();
 
 	const move = (e: PointerEvent) => {
 		if (e.pointerId === event.pointerId)
@@ -107,8 +109,10 @@ export function lockedDrag(
 		document.removeEventListener('pointermove', move);
 		document.removeEventListener('pointerup', up);
 		document.removeEventListener('pointercancel', up);
-		if (document.pointerLockElement === target)
-			document.exitPointerLock();
+		locked.then(() => {
+			if (root.pointerLockElement === target)
+				document.exitPointerLock();
+		});
 		handlers.end?.();
 	};
 	const up = (e: PointerEvent) => {
