@@ -126,6 +126,7 @@ export class NumberFieldElement extends HTMLElement {
 				this.endEdit(false);
 		});
 		this.input.addEventListener('blur', () => this.endEdit(true));
+		this.input.addEventListener('input', event => event.stopPropagation());
 		this.addEventListener('keydown', event => {
 			if (event.target !== this)
 				return;
@@ -202,18 +203,20 @@ export class NumberFieldElement extends HTMLElement {
 		this.setAttribute('aria-valuenow', String(this._value));
 	}
 
-	private update(value: number, type: 'input' | 'change') {
+	private update(value: number, commit: boolean) {
 		const next = this.coerce(value);
-		if (next === this._value && type === 'input')
+		if (next === this._value)
 			return;
 		this.requested = next;
 		this._value = next;
 		this.render();
-		this.dispatchEvent(new Event(type, { bubbles: true, composed: true }));
+		this.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+		if (commit)
+			this.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
 	}
 
 	private stepBy(direction: number) {
-		this.update(this._value + direction * this.step, 'change');
+		this.update(this._value + direction * this.step, true);
 	}
 
 	private pointerDown(event: PointerEvent) {
@@ -233,7 +236,7 @@ export class NumberFieldElement extends HTMLElement {
 					return;
 				dragging = true;
 				this.toggleAttribute('dragging', true);
-				this.update(start + Math.round(travelled) * this.step, 'input');
+				this.update(start + Math.round(travelled) * this.step, false);
 			},
 			end: () => {
 				this.toggleAttribute('dragging', false);
@@ -260,7 +263,7 @@ export class NumberFieldElement extends HTMLElement {
 		this.input.hidden = true;
 		const parsed = Number(this.input.value.replace(',', '.'));
 		if (commit && this.input.value.trim() !== '' && Number.isFinite(parsed))
-			this.update(parsed, 'change');
+			this.update(parsed, true);
 		this.focus();
 	}
 }
