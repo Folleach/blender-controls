@@ -14,7 +14,6 @@ describe('SplitResizeSession', () => {
 		const root = hsplit(leaf(), leaf());
 		const workspace = measured(root);
 
-		// 2 units over 800px; +200px moves the separator from 400px to 600px
 		new SplitResizeSession(workspace, root).apply(200);
 
 		expect(root.firstSize).toBeCloseTo(1.5);
@@ -49,7 +48,6 @@ describe('SplitResizeSession', () => {
 	});
 
 	it('clamps so neither side collapses below zero', () => {
-		// regression: sizes used to go negative when dragging past the edge
 		const root = hsplit(leaf(), leaf());
 		const workspace = measured(root);
 
@@ -74,7 +72,6 @@ describe('SplitResizeSession', () => {
 	});
 
 	it('lets a nested same-orientation split absorb the delta at the edge facing the separator', () => {
-		//  [ a | b ][ c ]  dragging the outer separator right by 100px keeps the a|b separator in place
 		const inner = hsplit(leaf(), leaf());
 		const root = hsplit(inner, leaf());
 		const workspace = measured(root);

@@ -15,9 +15,6 @@ export class GridAlignment implements PositionAlignment {
 	}
 }
 
-// Pure math of dragging something: remembers where the object and the pointer
-// were when the drag started, and maps any later pointer position to the new
-// object position. The renderer feeds it pointer coordinates.
 export class DragSession {
 	private readonly origin: Position;
 	private readonly pointer: Position;

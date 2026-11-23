@@ -99,7 +99,6 @@ describe('Workspace.remove', () => {
 	});
 
 	it('collapses the parent and reports a structural change to the grandparent', () => {
-		// regression: it used to report a resize, so views never re-rendered children
 		const a = leaf();
 		const b = leaf();
 		const c = leaf();
@@ -156,7 +155,6 @@ describe('Workspace.remove', () => {
 
 describe('Workspace.move', () => {
 	it('moves the same leaf object next to another leaf', () => {
-		// regression: joining used to remove the area and create a new one, losing its state
 		const a = leaf();
 		const b = leaf();
 		const c = leaf();

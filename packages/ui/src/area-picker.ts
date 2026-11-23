@@ -44,8 +44,6 @@ button:focus-visible {
 
 export const AREA_PICKER_TYPE = 'blen.area-picker';
 
-// An area listing every registered (non-hidden) area type; choosing one
-// replaces the picker with it. Updates when areas are registered later.
 export function areaPickerArea(options: { type?: string; name?: string } = {}): AreaDefinition<DomAreaInstance> {
 	const type = options.type ?? AREA_PICKER_TYPE;
 	return defineDomArea(

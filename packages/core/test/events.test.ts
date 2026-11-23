@@ -113,7 +113,6 @@ describe('Bus', () => {
 				return;
 			resubscribed = true;
 			disposeSecond();
-			// the same function, subscribed anew: a separate subscription
 			disposeSecond = bus.subscribe(second);
 		});
 		disposeSecond = bus.subscribe(second);

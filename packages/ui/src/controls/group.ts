@@ -14,7 +14,6 @@ const styles = css`
 }
 `;
 
-// <blen-group orientation="horizontal|vertical"> — joins controls into one block.
 export class GroupElement extends HTMLElement {
 	constructor() {
 		super();

@@ -23,7 +23,6 @@ beforeAll(() => defineElements());
 let counter = 0;
 const leaf = (type = 'counter') => new LeafArea(`leaf-${++counter}`, { type, data: undefined });
 
-// an area with state that must survive layout changes
 function counterArea() {
 	return defineDomArea('counter', () => {
 		const element = document.createElement('div');
@@ -89,7 +88,6 @@ describe('<blen-workspace>', () => {
 	});
 
 	it('re-renders the layout grid after structural changes', () => {
-		// regression: removing used to leave stale children in the grid
 		const a = leaf();
 		const b = leaf();
 		const c = leaf();

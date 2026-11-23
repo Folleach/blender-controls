@@ -41,7 +41,6 @@ describe('AreaRuntime', () => {
 	});
 
 	it('keeps instances when a neighbour is split', () => {
-		// regression: splitting used to recreate the area that was split
 		const { workspace, runtime } = setup();
 		const [a] = workspace.leaves();
 		const before = runtime.get(a!);
